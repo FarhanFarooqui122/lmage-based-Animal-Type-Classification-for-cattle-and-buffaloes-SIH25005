@@ -18,10 +18,12 @@ export async function loadModel(): Promise<boolean> {
   loadPromise = new Promise(async (resolve) => {
     try {
       await tf.ready()
-      try {
-        await tf.setBackend('webgl')
-      } catch {
-        await tf.setBackend('cpu')
+      const currentBackend = tf.getBackend()
+      if (currentBackend !== 'cpu') {
+        const switched = await tf.setBackend('cpu').catch(() => false)
+        if (!switched) {
+          console.warn('Could not switch to CPU backend, current:', currentBackend)
+        }
       }
       console.log('TF.js backend:', tf.getBackend())
 

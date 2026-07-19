@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Image-based Animal Type Classification for Cattle & Buffaloes
+
+**SIH 2025 — Problem Statement ID: SIH25005**
+
+[![Vercel](https://img.shields.io/badge/deploy%20on-Vercel-black)](https://vercel.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
+[![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-FF6F00)](https://www.tensorflow.org/js)
+
+## Overview
+
+An AI-powered web application for automated **Animal Type Classification (ATC)** under the **Rashtriya Gokul Mission (RGM)**. Upload a photo of a cow or buffalo to identify its breed and calculate a standardized ATC score based on body measurements.
+
+Built for the **Ministry of Fisheries, Animal Husbandry & Dairying**, this tool aims to replace subjective manual scoring with objective, AI-driven analysis.
+
+### Problem Statement
+
+- Manual ATC scoring by field workers is **subjective and inconsistent** (65-70% accuracy)
+- Human factors like fatigue and bias affect data quality in breeding programs
+- Current process consumes **40-60%** of field workers' time
+- Need for a standardized, automated system integrated with the **Bharat Pashudhan App (BPA)**
+
+### Solution
+
+1. **Upload** — Take or upload a photo of a cow/buffalo
+2. **Classify** — AI identifies the breed (18 Indian breeds supported) via TensorFlow.js
+3. **Measure** — Adjust body measurements (length, height, chest width, rump angle) via guided sliders
+4. **Score** — ATC scoring engine computes a standardized score (0-100) with per-trait breakdown
+5. **Export** — Generate Excel reports compatible with BPA integration
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| ML Runtime | TensorFlow.js (client-side inference) |
+| Model Training | Teachable Machine / Custom MobileNetV3 → TFJS |
+| UI | TailwindCSS + shadcn/ui |
+| Excel Export | SheetJS (xlsx) |
+| Deployment | Vercel (static export) |
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx           # Home page
+│   └── layout.tsx         # Root layout
+├── components/
+│   ├── AppShell.tsx       # Main app shell with tabs
+│   ├── ClientShell.tsx    # Client wrapper (SSR-safe)
+│   ├── ImageUpload.tsx    # Image upload with drag & drop + camera
+│   ├── Classifier.tsx     # TF.js breed classification
+│   ├── MeasurementForm.tsx # Guided measurement input
+│   ├── ExportButton.tsx   # Excel export
+│   ├── results/
+│   │   └── ATCScoreCard.tsx # Score results display
+│   └── ui/                # shadcn/ui components
+├── lib/
+│   ├── atc-scoring.ts     # ATC scoring formula
+│   ├── breed-standards.ts # Breed data & ideal measurements
+│   ├── excel-export.ts    # Excel generation utility
+│   ├── tfjs-loader.ts     # TF.js model loader (with mock fallback)
+│   └── utils.ts
+├── types/
+│   └── index.ts           # TypeScript types
+public/models/              # TF.js model files
+```
+
+## Supported Breeds (18)
+
+**Cattle (10):** Gir, Sahiwal, Tharparkar, Red Sindhi, Ongole, Kankrej, Hariana, Rathi, Khillari, Deoni
+
+**Buffalo (8):** Murrah, Surti, Banni, Jaffarabadi, Bhadawari, Mehsana, Nagpuri, Pandharpuri
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Clone the repo
+git clone https://github.com/FarhanFarooqui122/lmage-based-Animal-Type-Classification-for-cattle-and-buffaloes-SIH25005.git
+
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Model Training
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The breed classifier uses TensorFlow.js with a Teachable Machine compatible model:
 
-## Learn More
+1. Go to [Teachable Machine](https://teachablemachine.withgoogle.com/)
+2. Train an Image Classifier with your breed images
+3. Export as TensorFlow.js
+4. Place `model.json` and weight files in `public/models/`
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+npx vercel deploy
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The app is designed for **static export** — all ML inference happens client-side, so Vercel free tier works perfectly.
 
-## Deploy on Vercel
+## ATC Scoring Formula
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The overall ATC score is a weighted composite:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Trait | Weight |
+|---|---|
+| Body Length | 30% |
+| Height at Withers | 25% |
+| Chest Width | 25% |
+| Rump Angle | 20% |
+
+Each trait is scored 0-100 based on proximity to breed-specific ideal values (per RGM guidelines).
+
+## License
+
+MIT

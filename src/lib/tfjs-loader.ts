@@ -1,18 +1,13 @@
 import * as tf from '@tensorflow/tfjs'
 
-let model: tf.GraphModel | null = null
+let model: tf.LayersModel | tf.GraphModel | null = null
 let breedLabels: string[] = []
 let isLoading = false
 let loadPromise: Promise<boolean> | null = null
 
-async function fetchLabels(): Promise<string[]> {
-  try {
-    const res = await fetch('/models/metadata.json')
-    const meta = await res.json()
-    return meta.labels || []
-  } catch {
-    return []
-  }
+async function fetchJSON(path: string): Promise<any> {
+  const res = await fetch(path)
+  return res.json()
 }
 
 export async function loadModel(): Promise<boolean> {
@@ -23,14 +18,26 @@ export async function loadModel(): Promise<boolean> {
   loadPromise = new Promise(async (resolve) => {
     try {
       await tf.ready()
-      await tf.setBackend('webgl')
+      try {
+        await tf.setBackend('webgl')
+      } catch {
+        await tf.setBackend('cpu')
+      }
       console.log('TF.js backend:', tf.getBackend())
 
-      model = await tf.loadGraphModel('/models/model.json')
-      breedLabels = await fetchLabels()
+      breedLabels = await fetchJSON('/models/metadata.json').then(m => m.labels || [])
+
+      try {
+        model = await tf.loadLayersModel('/models/model.json')
+        console.log('Model loaded as LayersModel')
+      } catch {
+        model = await tf.loadGraphModel('/models/model.json')
+        console.log('Model loaded as GraphModel')
+      }
+
       resolve(true)
     } catch (err) {
-      console.warn('TF.js model load failed, using mock:', err)
+      console.error('TF.js model load failed:', err)
       model = null
       breedLabels = ['Gir', 'Sahiwal', 'Kankrej', 'Ongole', 'Murrah', 'Surti', 'Jaffarabadi', 'Bhadawari']
       resolve(false)
@@ -49,38 +56,41 @@ export function isModelLoaded(): boolean {
 export async function classifyImage(
   imageElement: HTMLImageElement | HTMLCanvasElement
 ): Promise<Array<{ breed: string; confidence: number }>> {
-  if (!model) return getMockPredictions()
+  if (!model) {
+    console.warn('No model loaded, using mock predictions')
+    return getMockPredictions()
+  }
 
-  const tensor = tf.tidy(() => {
-    let img = tf.browser.fromPixels(imageElement)
-    img = tf.image.resizeBilinear(img, [224, 224])
-    img = img.expandDims(0)
-    img = img.toFloat()
-    img = img.div(127.5).sub(1)
-    return img
-  })
+  let tensor: tf.Tensor | null = null
+  let output: tf.Tensor | null = null
 
-  const output = model.predict(tensor) as tf.Tensor
-  const logits = await output.data()
-  tensor.dispose()
-  output.dispose()
+  try {
+    tensor = tf.tidy(() => {
+      let img = tf.browser.fromPixels(imageElement)
+      img = tf.image.resizeBilinear(img, [224, 224])
+      img = img.expandDims(0)
+      img = img.toFloat()
+      img = img.div(255.0)
+      return img
+    })
 
-  const probs = Array.from(logits)
-  const softmax = softmaxFn(probs)
+    output = model.predict(tensor) as tf.Tensor
+    const logits = await output.data()
+    const probs = Array.from(logits)
 
-  const predictions = breedLabels
-    .map((breed, i) => ({ breed, confidence: Math.round(softmax[i] * 100) }))
-    .sort((a, b) => b.confidence - a.confidence)
-    .slice(0, 5)
+    const predictions = breedLabels
+      .map((breed, i) => ({ breed, confidence: Math.round(probs[i] * 100) }))
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, 5)
 
-  return predictions
-}
-
-function softmaxFn(logits: number[]): number[] {
-  const max = Math.max(...logits)
-  const exps = logits.map(l => Math.exp(l - max))
-  const sum = exps.reduce((a, b) => a + b, 0)
-  return exps.map(e => e / sum)
+    return predictions
+  } catch (err) {
+    console.error('Classification failed:', err)
+    return getMockPredictions()
+  } finally {
+    if (tensor) tensor.dispose()
+    if (output) output.dispose()
+  }
 }
 
 function getMockPredictions(): Array<{ breed: string; confidence: number }> {

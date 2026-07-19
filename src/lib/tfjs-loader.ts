@@ -72,7 +72,7 @@ export async function classifyImage(
       img = tf.image.resizeBilinear(img, [224, 224])
       img = img.expandDims(0)
       img = img.toFloat()
-      img = img.div(255.0)
+      img = img.div(127.5).sub(1.0)
       return img
     })
 

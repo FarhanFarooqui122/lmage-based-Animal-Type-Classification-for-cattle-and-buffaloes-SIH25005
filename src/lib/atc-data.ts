@@ -1,4 +1,4 @@
-import { classifyImage as tfClassify, getBreedCategory } from '@/lib/tfjs-loader'
+import { classifyImage as tfClassify, getBreedCategory, loadModel } from '@/lib/tfjs-loader'
 import { getBreed, breedStandards as allStandards } from '@/lib/breed-standards'
 import { generateATCExcel, downloadExcel } from '@/lib/excel-export'
 import { calculateATCScore } from '@/lib/atc-scoring'
@@ -73,11 +73,24 @@ for (const key of Object.keys(allStandards)) {
   if (m) BREED_STANDARDS[key] = m
 }
 
+let modelLoading: Promise<boolean | void> | null = null
+
+function ensureModelLoaded(): Promise<boolean | void> {
+  if (!modelLoading) {
+    modelLoading = loadModel().catch(err => {
+      console.warn('Model load failed, will use mock:', err)
+      modelLoading = null
+    })
+  }
+  return modelLoading
+}
+
 export async function classifyImage(
   imageUrl: string,
   _seed: number,
   _isSample: boolean
 ): Promise<ClassificationResult> {
+  await ensureModelLoaded()
   return new Promise((resolve) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'

@@ -5,6 +5,16 @@ let breedLabels: string[] = []
 let isLoading = false
 let loadPromise: Promise<boolean> | null = null
 
+async function fetchLabels(): Promise<string[]> {
+  try {
+    const res = await fetch('/models/metadata.json')
+    const meta = await res.json()
+    return meta.labels || []
+  } catch {
+    return []
+  }
+}
+
 export async function loadModel(): Promise<boolean> {
   if (model) return true
   if (isLoading && loadPromise) return loadPromise
@@ -17,16 +27,12 @@ export async function loadModel(): Promise<boolean> {
       console.log('TF.js backend:', tf.getBackend())
 
       model = await tf.loadGraphModel('/models/model.json')
-      breedLabels = [
-        'Gir', 'Sahiwal', 'Tharparkar', 'Red Sindhi', 'Ongole',
-        'Kankrej', 'Hariana', 'Rathi', 'Khillari', 'Deoni',
-        'Murrah', 'Surti', 'Banni', 'Jaffarabadi', 'Bhadawari',
-        'Mehsana', 'Nagpuri', 'Pandharpuri',
-      ]
+      breedLabels = await fetchLabels()
       resolve(true)
     } catch (err) {
       console.warn('TF.js model load failed, using mock:', err)
       model = null
+      breedLabels = ['Gir', 'Sahiwal', 'Kankrej', 'Ongole', 'Murrah', 'Surti', 'Jaffarabadi', 'Bhadawari']
       resolve(false)
     } finally {
       isLoading = false
@@ -79,15 +85,15 @@ function softmaxFn(logits: number[]): number[] {
 
 function getMockPredictions(): Array<{ breed: string; confidence: number }> {
   return [
-    { breed: 'Gir', confidence: 92 },
-    { breed: 'Kankrej', confidence: 4 },
-    { breed: 'Sahiwal', confidence: 2 },
-    { breed: 'Tharparkar', confidence: 1 },
-    { breed: 'Red Sindhi', confidence: 1 },
+    { breed: 'Gir', confidence: 88 },
+    { breed: 'Sahiwal', confidence: 5 },
+    { breed: 'Kankrej', confidence: 3 },
+    { breed: 'Murrah', confidence: 2 },
+    { breed: 'Ongole', confidence: 2 },
   ]
 }
 
 export function getBreedCategory(breed: string): 'Cattle' | 'Buffalo' {
-  const buffaloBreeds = ['Murrah', 'Surti', 'Banni', 'Jaffarabadi', 'Bhadawari', 'Mehsana', 'Nagpuri', 'Pandharpuri']
+  const buffaloBreeds = ['Murrah', 'Surti', 'Jaffarabadi', 'Bhadawari']
   return buffaloBreeds.includes(breed) ? 'Buffalo' : 'Cattle'
 }

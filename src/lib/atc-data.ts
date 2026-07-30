@@ -207,28 +207,33 @@ export function computeAtcScore(measurements: Measurements, breed: string): AtcR
 }
 
 export function exportToExcel(result: AtcResult, breed: string, category: AnimalCategory) {
-  const timestamp = new Date().toISOString()
-  const rows: string[][] = [
-    ['ATC Report - Rashtriya Gokul Mission (BPA Compatible)'],
-    ['Generated', timestamp],
-    ['Breed', breed],
-    ['Category', category],
-    ['Overall ATC Score', String(result.overall)],
-    ['Grade', `${result.grade} - ${result.gradeLabel}`],
-    [],
-    ['Trait', 'Measured Value', 'Ideal Value', 'Unit', 'Score (0-100)', 'Status'],
-    ...result.traits.map(t => [
-      t.label, String(t.measured), String(t.ideal), t.unit, String(t.score), t.status,
-    ]),
-  ]
-  const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(',')).join('\r\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `ATC_Report_${breed.replace(/\s/g, '_')}_${Date.now()}.csv`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  const traitMap: Record<string, keyof Measurements> = {
+    bodyLength: 'bodyLength',
+    heightWithers: 'heightAtWithers',
+    chestWidth: 'chestWidth',
+    rumpAngle: 'rumpAngle',
+  }
+  const measurements: Measurements = { bodyLength: 0, heightWithers: 0, chestWidth: 0, rumpAngle: 0 }
+  for (const t of result.traits) {
+    const mKey = traitMap[t.key]
+    if (mKey) measurements[mKey] = t.measured
+  }
+  const blob = generateATCExcel(
+    {
+      overallScore: result.overall,
+      grade: `${result.grade} - ${result.gradeLabel}`,
+      traits: result.traits.map(t => ({
+        trait: t.label,
+        value: t.measured,
+        score: t.score,
+        ideal: t.ideal,
+        status: t.status.toLowerCase() as 'excellent' | 'good' | 'average' | 'poor',
+      })),
+      breed,
+      category,
+      classificationConfidence: 100,
+    },
+    measurements
+  )
+  downloadExcel(blob, `ATC_Report_${breed.replace(/\s/g, '_')}_${Date.now()}.xlsx`)
 }

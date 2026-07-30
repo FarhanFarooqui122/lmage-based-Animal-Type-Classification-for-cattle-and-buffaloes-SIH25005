@@ -62,9 +62,12 @@ export function MeasureStep({ breed, imageUrl, measurements, onChange, onReset, 
                     <span className="bg-secondary text-primary flex size-8 items-center justify-center rounded-md">
                       <Icon className="size-4" aria-hidden />
                     </span>
-                    <span>
-                      {t.label}
-                      <span className="text-muted-foreground ml-1 text-xs font-normal">({t.unit})</span>
+                    <span className="flex flex-col">
+                      <span>
+                        {t.label}
+                        <span className="text-muted-foreground ml-1 text-xs font-normal">({t.unit})</span>
+                      </span>
+                      <span className="text-muted-foreground/60 text-xs font-normal">{t.labelHi}</span>
                     </span>
                   </label>
                   <span className="text-primary text-xl font-bold tabular-nums">

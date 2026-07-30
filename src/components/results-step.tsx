@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { exportToExcel, type AnimalCategory, type AtcResult, type TraitScore } from '@/lib/atc-data'
+import { exportToExcel, TRAITS, type AnimalCategory, type AtcResult, type TraitScore } from '@/lib/atc-data'
 import { FileSpreadsheet, RefreshCw } from 'lucide-react'
 
 const STATUS_STYLES: Record<TraitScore['status'], { badge: string; bar: string }> = {
@@ -18,6 +18,11 @@ interface ResultsStepProps {
   category: AnimalCategory
   imageUrl: string
   onRestart: () => void
+}
+
+const labelHiMap: Record<string, string> = {}
+for (const t of TRAITS) {
+  labelHiMap[t.label] = t.labelHi
 }
 
 export function ResultsStep({ result, breed, category, imageUrl, onRestart }: ResultsStepProps) {
@@ -59,6 +64,7 @@ export function ResultsStep({ result, breed, category, imageUrl, onRestart }: Re
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-col">
                   <h3 className="font-semibold">{t.label}</h3>
+                  <span className="text-muted-foreground/60 text-xs">{labelHiMap[t.label]}</span>
                   <p className="text-muted-foreground text-sm tabular-nums">
                     {t.measured}{t.unit} measured · {t.ideal}{t.unit} ideal
                   </p>

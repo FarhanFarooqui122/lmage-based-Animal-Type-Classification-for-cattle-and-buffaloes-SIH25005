@@ -121,10 +121,3 @@ export function getBreed(breedName: string): BreedStandard | undefined {
   return breedStandards[breedName]
 }
 
-export const mockBreedPredictions = [
-  { breed: 'Gir', confidence: 92 },
-  { breed: 'Kankrej', confidence: 4 },
-  { breed: 'Sahiwal', confidence: 2 },
-  { breed: 'Tharparkar', confidence: 1 },
-  { breed: 'Red Sindhi', confidence: 1 },
-]

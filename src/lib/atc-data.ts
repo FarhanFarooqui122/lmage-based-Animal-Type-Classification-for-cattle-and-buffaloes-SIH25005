@@ -207,16 +207,14 @@ export function computeAtcScore(measurements: Measurements, breed: string): AtcR
 }
 
 export function exportToExcel(result: AtcResult, breed: string, category: AnimalCategory) {
-  const traitMap: Record<string, keyof Measurements> = {
-    bodyLength: 'bodyLength',
-    heightWithers: 'heightAtWithers',
-    chestWidth: 'chestWidth',
-    rumpAngle: 'rumpAngle',
+  const excelMeasurements: OurMeasurements = {
+    bodyLength: 0, heightAtWithers: 0, chestWidth: 0, rumpAngle: 0,
   }
-  const measurements: Measurements = { bodyLength: 0, heightWithers: 0, chestWidth: 0, rumpAngle: 0 }
   for (const t of result.traits) {
-    const mKey = traitMap[t.key]
-    if (mKey) measurements[mKey] = t.measured
+    if (t.key === 'heightWithers') excelMeasurements.heightAtWithers = t.measured
+    else if (t.key === 'bodyLength') excelMeasurements.bodyLength = t.measured
+    else if (t.key === 'chestWidth') excelMeasurements.chestWidth = t.measured
+    else if (t.key === 'rumpAngle') excelMeasurements.rumpAngle = t.measured
   }
   const blob = generateATCExcel(
     {
@@ -233,7 +231,7 @@ export function exportToExcel(result: AtcResult, breed: string, category: Animal
       category,
       classificationConfidence: 100,
     },
-    measurements
+    excelMeasurements
   )
   downloadExcel(blob, `ATC_Report_${breed.replace(/\s/g, '_')}_${Date.now()}.xlsx`)
 }

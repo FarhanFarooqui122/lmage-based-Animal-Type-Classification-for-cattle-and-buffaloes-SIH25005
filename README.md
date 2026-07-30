@@ -22,7 +22,7 @@ Built for the **Ministry of Fisheries, Animal Husbandry & Dairying**, this tool 
 ### Solution
 
 1. **Upload** — Take or upload a photo of a cow/buffalo
-2. **Classify** — AI identifies the breed (18 Indian breeds supported) via TensorFlow.js
+2. **Classify** — AI identifies the breed (8 Indian breeds detected; 16 breed standards available) via TensorFlow.js
 3. **Measure** — Adjust body measurements (length, height, chest width, rump angle) via guided sliders
 4. **Score** — ATC scoring engine computes a standardized score (0-100) with per-trait breakdown
 5. **Export** — Generate Excel reports compatible with BPA integration
@@ -33,7 +33,7 @@ Built for the **Ministry of Fisheries, Animal Husbandry & Dairying**, this tool 
 |---|---|
 | Framework | Next.js 16 (App Router) |
 | ML Runtime | TensorFlow.js (client-side inference) |
-| Model Training | Teachable Machine / Custom MobileNetV3 → TFJS |
+| Model Training | MobileNetV2 (Keras) → TF.js LayersModel via `colab_train.py` |
 | UI | TailwindCSS + shadcn/ui |
 | Excel Export | SheetJS (xlsx) |
 | Deployment | Vercel (static export) |
@@ -44,33 +44,38 @@ Built for the **Ministry of Fisheries, Animal Husbandry & Dairying**, this tool 
 src/
 ├── app/                    # Next.js App Router pages
 │   ├── page.tsx           # Home page
-│   └── layout.tsx         # Root layout
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Tailwind v4 + shadcn theme
 ├── components/
-│   ├── AppShell.tsx       # Main app shell with tabs
-│   ├── ClientShell.tsx    # Client wrapper (SSR-safe)
-│   ├── ImageUpload.tsx    # Image upload with drag & drop + camera
-│   ├── Classifier.tsx     # TF.js breed classification
-│   ├── MeasurementForm.tsx # Guided measurement input
-│   ├── ExportButton.tsx   # Excel export
-│   ├── results/
-│   │   └── ATCScoreCard.tsx # Score results display
-│   └── ui/                # shadcn/ui components
+│   ├── atc-wizard.tsx     # 4-step wizard state controller
+│   ├── wizard-client.tsx  # Dynamic import wrapper (ssr:false)
+│   ├── site-header.tsx    # Header & footer with RGM branding
+│   ├── step-indicator.tsx # 4-step progress bar
+│   ├── upload-step.tsx    # Step 0: drag-drop image upload
+│   ├── classify-step.tsx  # Step 1: AI breed predictions
+│   ├── measure-step.tsx   # Step 2: body measurement sliders
+│   ├── results-step.tsx   # Step 3: ATC score + export
+│   └── ui/                # shadcn/ui primitives
+│       └── button.tsx     # @base-ui/react button
 ├── lib/
-│   ├── atc-scoring.ts     # ATC scoring formula
-│   ├── breed-standards.ts # Breed data & ideal measurements
-│   ├── excel-export.ts    # Excel generation utility
-│   ├── tfjs-loader.ts     # TF.js model loader (with mock fallback)
-│   └── utils.ts
+│   ├── atc-data.ts        # Integration bridge (TF.js + scoring + export)
+│   ├── atc-scoring.ts     # Weighted ATC scoring algorithm
+│   ├── breed-standards.ts # 16 breed standards data
+│   ├── excel-export.ts    # XLSX generation (SheetJS)
+│   ├── tfjs-loader.ts     # TF.js model loader + classify
+│   └── utils.ts           # cn() helper
 ├── types/
-│   └── index.ts           # TypeScript types
-public/models/              # TF.js model files
+│   └── index.ts           # Shared TypeScript interfaces
+public/
+├── models/                # TF.js model (model.json, weights.bin, metadata.json)
+└── images/                # Sample images
 ```
 
-## Supported Breeds (18)
+## Supported Breeds
 
-**Cattle (10):** Gir, Sahiwal, Tharparkar, Red Sindhi, Ongole, Kankrej, Hariana, Rathi, Khillari, Deoni
+**Model detects (8):** Gir, Sahiwal, Kankrej, Ongole, Murrah, Surti, Jaffarabadi, Bhadawari
 
-**Buffalo (8):** Murrah, Surti, Banni, Jaffarabadi, Bhadawari, Mehsana, Nagpuri, Pandharpuri
+**Breed standards available (16):** All 8 detectables plus Tharparkar, Red Sindhi, Hariana, Rathi, Khillari, Deoni, Banni, Mehsana, Nagpuri, Pandharpuri
 
 ## Getting Started
 
@@ -89,12 +94,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Model Training
 
-The breed classifier uses TensorFlow.js with a Teachable Machine compatible model:
+The breed classifier uses a MobileNetV2-derived model trained via `colab_train.py`:
 
-1. Go to [Teachable Machine](https://teachablemachine.withgoogle.com/)
-2. Train an Image Classifier with your breed images
-3. Export as TensorFlow.js
-4. Place `model.json` and weight files in `public/models/`
+1. Open `colab_train.py` and paste each cell into a Google Colab notebook
+2. Upload your Kaggle API key when prompted (Cell 2)
+3. Run all cells — trains on 3 Kaggle datasets (~7400 images, 8 breeds)
+4. Final cells convert Keras `.h5` → TF.js LayersModel + `metadata.json`
+5. Extract the downloaded ZIP into `public/models/`
 
 ## Deployment
 
@@ -103,7 +109,7 @@ npm run build
 npx vercel deploy
 ```
 
-The app is designed for **static export** — all ML inference happens client-side, so Vercel free tier works perfectly.
+All ML inference happens client-side (TensorFlow.js), so no server-side ML compute is needed.
 
 ## ATC Scoring Formula
 

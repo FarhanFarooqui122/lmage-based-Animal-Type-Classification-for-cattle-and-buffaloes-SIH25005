@@ -44,7 +44,7 @@ UploadStep → handleImageSelected()
 → ClassifyStep shows predictions
 → MeasureStep → computeAtcScore(measurements, breed)
   → atc-scoring.ts:calculateATCScore()
-→ ResultsStep → exportToExcel() // generates CSV, not XLSX
+→ ResultsStep → exportToExcel() // generates XLSX via SheetJS
 ```
 
 ### Model Details
@@ -90,7 +90,7 @@ UploadStep → handleImageSelected()
 | `src/lib/breed-standards.ts` | Breed standards data for 16 breeds |
 | `src/lib/excel-export.ts` | XLSX generation (SheetJS, wired via `atc-data.ts:exportToExcel()`) |
 | `src/components/atc-wizard.tsx` | Main state controller for the 4-step wizard |
-| `colab_train.py` | Google Colab notebook script for model training & TF.js export |
+| `colab_train.py` | Google Colab notebook script for model training & TF.js export (tracked in repo) |
 
 ### Model Loading Pattern
 - `loadModel()` is called lazily on first classification (not at app startup)
@@ -99,9 +99,6 @@ UploadStep → handleImageSelected()
 - Always sets CPU backend (WebGL not available on target devices)
 
 ### Known Gotchas
-- Type name collision: `ClassificationResult` in `@/types` (has `breed,category,confidence,topPredictions`) differs from `@/lib/atc-data` (has `top,predictions`)
-- Measurement field name mismatch: `atc-data.ts` uses `heightWithers`, `@/types` uses `heightAtWithers`
-- `exportToExcel()` in `atc-data.ts` maps local `Measurements` (heightWithers) to `OurMeasurements` (heightAtWithers) for the SheetJS excel-export.ts
 - `.gitattributes` marks `public/models/*` and `*.bin` as binary to prevent CRLF corruption
 - Colab free tier `/content/` is ephemeral — all data & checkpoints lost on runtime disconnect. Recovery Cell 8b only works if runtime hasn't disconnected
 - Colab GPU quota resets ~24hrs after last use; switch to CPU runtime to export without GPU

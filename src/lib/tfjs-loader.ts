@@ -1,11 +1,17 @@
 import * as tf from '@tensorflow/tfjs'
 
+interface ModelMetadata {
+  labels: string[]
+  imageSize?: number
+  [key: string]: unknown
+}
+
 let model: tf.LayersModel | tf.GraphModel | null = null
 let breedLabels: string[] = []
 let isLoading = false
 let loadPromise: Promise<boolean> | null = null
 
-async function fetchJSON(path: string): Promise<any> {
+async function fetchJSON(path: string): Promise<ModelMetadata> {
   const res = await fetch(path)
   return res.json()
 }

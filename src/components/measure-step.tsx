@@ -6,7 +6,7 @@ import { ArrowLeft, Calculator, Info, MoveHorizontal, MoveVertical, Ruler, Rotat
 
 const TRAIT_ICONS: Record<TraitKey, React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>> = {
   bodyLength: Ruler,
-  heightWithers: MoveVertical,
+  heightAtWithers: MoveVertical,
   chestWidth: MoveHorizontal,
   rumpAngle: TriangleRight,
 }

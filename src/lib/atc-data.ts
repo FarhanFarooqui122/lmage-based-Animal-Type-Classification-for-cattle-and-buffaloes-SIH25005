@@ -2,9 +2,11 @@ import { classifyImage as tfClassify, getBreedCategory, loadModel } from '@/lib/
 import { getBreed, breedStandards as allStandards } from '@/lib/breed-standards'
 import { generateATCExcel, downloadExcel } from '@/lib/excel-export'
 import { calculateATCScore } from '@/lib/atc-scoring'
-import type { Measurements as OurMeasurements, ClassificationResult as TypesClassificationResult, TraitScore as TypesTraitScore } from '@/types'
+import type { Measurements as OurMeasurements, ClassificationResult as TypesClassificationResult } from '@/types'
 
 export type AnimalCategory = 'Cattle' | 'Buffalo'
+
+export { getBreedCategory }
 
 export interface BreedPrediction {
   breed: string
@@ -25,7 +27,7 @@ export interface TraitDef {
   tolerance: number
 }
 
-export type TraitKey = 'bodyLength' | 'heightWithers' | 'chestWidth' | 'rumpAngle'
+export type TraitKey = 'bodyLength' | 'heightAtWithers' | 'chestWidth' | 'rumpAngle'
 
 export type Measurements = Record<TraitKey, number>
 
@@ -48,7 +50,7 @@ export interface AtcResult {
 
 export const TRAITS: TraitDef[] = [
   { key: 'bodyLength', label: 'Body Length', labelHi: 'शरीर की लंबाई', unit: 'cm', min: 100, max: 190, ideal: 150, tolerance: 40 },
-  { key: 'heightWithers', label: 'Height at Withers', labelHi: 'कंधे की ऊंचाई', unit: 'cm', min: 100, max: 160, ideal: 132, tolerance: 30 },
+  { key: 'heightAtWithers', label: 'Height at Withers', labelHi: 'कंधे की ऊंचाई', unit: 'cm', min: 100, max: 160, ideal: 132, tolerance: 30 },
   { key: 'chestWidth', label: 'Chest Width', labelHi: 'छाती की चौड़ाई', unit: 'cm', min: 30, max: 80, ideal: 55, tolerance: 25 },
   { key: 'rumpAngle', label: 'Rump Angle', labelHi: 'पुट्ठे का कोण', unit: '°', min: 10, max: 45, ideal: 25, tolerance: 18 },
 ]
@@ -58,7 +60,7 @@ function mapToStandards(breed: string): Measurements | null {
   if (!s) return null
   return {
     bodyLength: s.idealBodyLength,
-    heightWithers: s.idealHeightAtWithers,
+    heightAtWithers: s.idealHeightAtWithers,
     chestWidth: s.idealChestWidth,
     rumpAngle: s.idealRumpAngle,
   }
@@ -83,9 +85,7 @@ function ensureModelLoaded(): Promise<boolean | void> {
 }
 
 export async function classifyImage(
-  imageUrl: string,
-  _seed: number,
-  _isSample: boolean
+  imageUrl: string
 ): Promise<ClassificationResult> {
   await ensureModelLoaded()
   return new Promise((resolve) => {
@@ -138,7 +138,7 @@ function traitStatus(score: number): TraitScore['status'] {
 export function computeAtcScore(measurements: Measurements, breed: string): AtcResult {
   const ourMeasurements: OurMeasurements = {
     bodyLength: measurements.bodyLength,
-    heightAtWithers: measurements.heightWithers,
+    heightAtWithers: measurements.heightAtWithers,
     chestWidth: measurements.chestWidth,
     rumpAngle: measurements.rumpAngle,
   }
@@ -147,7 +147,7 @@ export function computeAtcScore(measurements: Measurements, breed: string): AtcR
   if (scored) {
     const traitMap: Record<string, TraitKey> = {
       'Body Length': 'bodyLength',
-      'Height at Withers': 'heightWithers',
+      'Height at Withers': 'heightAtWithers',
       'Chest Width': 'chestWidth',
       'Rump Angle': 'rumpAngle',
     }
@@ -160,23 +160,6 @@ export function computeAtcScore(measurements: Measurements, breed: string): AtcR
       score: t.score,
       status: traitStatus(t.score),
     }))
-
-    const gradeMap: Record<string, string> = {
-      'A+': 'A+',
-      'A (Very Good)': 'A',
-      'B+ (Good)': 'B',
-      'B (Fair)': 'C',
-      'C (Average)': 'D',
-      'D (Poor)': 'D',
-    }
-    const gradeLabelMap: Record<string, string> = {
-      'A+': 'Excellent',
-      'A (Very Good)': 'Very Good',
-      'B+ (Good)': 'Good',
-      'B (Fair)': 'Fair',
-      'C (Average)': 'Average',
-      'D (Poor)': 'Poor',
-    }
 
     let grade = 'D'
     let gradeLabel = 'Poor'
@@ -206,12 +189,12 @@ export function computeAtcScore(measurements: Measurements, breed: string): AtcR
   return { overall, grade, gradeLabel, traits }
 }
 
-export function exportToExcel(result: AtcResult, breed: string, category: AnimalCategory) {
+export function exportToExcel(result: AtcResult, breed: string, category: AnimalCategory, classificationConfidence: number) {
   const excelMeasurements: OurMeasurements = {
     bodyLength: 0, heightAtWithers: 0, chestWidth: 0, rumpAngle: 0,
   }
   for (const t of result.traits) {
-    if (t.key === 'heightWithers') excelMeasurements.heightAtWithers = t.measured
+    if (t.key === 'heightAtWithers') excelMeasurements.heightAtWithers = t.measured
     else if (t.key === 'bodyLength') excelMeasurements.bodyLength = t.measured
     else if (t.key === 'chestWidth') excelMeasurements.chestWidth = t.measured
     else if (t.key === 'rumpAngle') excelMeasurements.rumpAngle = t.measured
@@ -229,7 +212,7 @@ export function exportToExcel(result: AtcResult, breed: string, category: Animal
       })),
       breed,
       category,
-      classificationConfidence: 100,
+      classificationConfidence,
     },
     excelMeasurements
   )

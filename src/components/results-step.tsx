@@ -18,6 +18,7 @@ interface ResultsStepProps {
   category: AnimalCategory
   imageUrl: string
   onRestart: () => void
+  classificationConfidence: number
 }
 
 const labelHiMap: Record<string, string> = {}
@@ -25,7 +26,7 @@ for (const t of TRAITS) {
   labelHiMap[t.label] = t.labelHi
 }
 
-export function ResultsStep({ result, breed, category, imageUrl, onRestart }: ResultsStepProps) {
+export function ResultsStep({ result, breed, category, imageUrl, onRestart, classificationConfidence }: ResultsStepProps) {
   return (
     <div className="animate-fade-up flex flex-col gap-6">
       <div className="flex flex-col gap-1 text-center">
@@ -93,7 +94,7 @@ export function ResultsStep({ result, breed, category, imageUrl, onRestart }: Re
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button size="lg" onClick={() => exportToExcel(result, breed, category)} className="w-full sm:w-auto">
+        <Button size="lg" onClick={() => exportToExcel(result, breed, category, classificationConfidence)} className="w-full sm:w-auto">
           <FileSpreadsheet className="size-4" aria-hidden />
           Export to Excel (BPA format)
         </Button>

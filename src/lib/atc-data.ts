@@ -2,7 +2,7 @@ import { classifyImage as tfClassify, getBreedCategory, loadModel } from '@/lib/
 import { getBreed, breedStandards as allStandards } from '@/lib/breed-standards'
 import { generateATCExcel, downloadExcel } from '@/lib/excel-export'
 import { calculateATCScore } from '@/lib/atc-scoring'
-import type { Measurements as OurMeasurements } from '@/types'
+import type { Measurements as OurMeasurements, ClassificationResult as TypesClassificationResult, TraitScore as TypesTraitScore } from '@/types'
 
 export type AnimalCategory = 'Cattle' | 'Buffalo'
 
@@ -12,10 +12,7 @@ export interface BreedPrediction {
   confidence: number
 }
 
-export interface ClassificationResult {
-  top: BreedPrediction
-  predictions: BreedPrediction[]
-}
+export type ClassificationResult = TypesClassificationResult
 
 export interface TraitDef {
   key: TraitKey
@@ -100,10 +97,11 @@ export async function classifyImage(
         const top = predictions[0]
         const category = getBreedCategory(top.breed)
         const result: ClassificationResult = {
-          top: { breed: top.breed, category, confidence: top.confidence },
-          predictions: predictions.slice(0, 3).map(p => ({
+          breed: top.breed,
+          category,
+          confidence: top.confidence,
+          topPredictions: predictions.slice(0, 3).map(p => ({
             breed: p.breed,
-            category: getBreedCategory(p.breed),
             confidence: p.confidence,
           })),
         }
@@ -119,11 +117,13 @@ export async function classifyImage(
 
 function fallbackPrediction(): ClassificationResult {
   return {
-    top: { breed: 'Gir', category: 'Cattle', confidence: 88 },
-    predictions: [
-      { breed: 'Gir', category: 'Cattle', confidence: 88 },
-      { breed: 'Sahiwal', category: 'Cattle', confidence: 6 },
-      { breed: 'Kankrej', category: 'Cattle', confidence: 3 },
+    breed: 'Gir',
+    category: 'Cattle',
+    confidence: 88,
+    topPredictions: [
+      { breed: 'Gir', confidence: 88 },
+      { breed: 'Sahiwal', confidence: 6 },
+      { breed: 'Kankrej', confidence: 3 },
     ],
   }
 }

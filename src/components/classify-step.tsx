@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import type { ClassificationResult } from '@/lib/atc-data'
+import { getBreedCategory } from '@/lib/atc-data'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 function confidenceColor(c: number) {
@@ -89,18 +90,18 @@ export function ClassifyStep({ loading, imageUrl, result, onBack, onNext }: Clas
         ) : (
           <div className="bg-card flex flex-col gap-6 rounded-xl border p-6 shadow-sm">
             <div className="flex flex-wrap items-center gap-5">
-              <ConfidenceRing value={result.top.confidence} />
+              <ConfidenceRing value={result.confidence} />
               <div className="flex flex-col gap-2">
-                <h3 className="text-3xl font-bold sm:text-4xl">{result.top.breed}</h3>
+                <h3 className="text-3xl font-bold sm:text-4xl">{result.breed}</h3>
                 <span
                   className={cn(
                     'w-fit rounded-full px-3 py-1 text-xs font-semibold',
-                    result.top.category === 'Cattle'
+                    result.category === 'Cattle'
                       ? 'bg-secondary text-secondary-foreground'
                       : 'bg-accent/20 text-accent-foreground',
                   )}
                 >
-                  {result.top.category}
+                  {result.category}
                 </span>
               </div>
             </div>
@@ -109,12 +110,12 @@ export function ClassifyStep({ loading, imageUrl, result, onBack, onNext }: Clas
               <h4 className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
                 Top 3 predictions
               </h4>
-              {result.predictions.map((p) => (
+              {result.topPredictions.map((p) => (
                 <div key={p.breed} className="flex flex-col gap-1">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">
                       {p.breed}
-                      <span className="text-muted-foreground ml-2 text-xs">({p.category})</span>
+                      <span className="text-muted-foreground ml-2 text-xs">({getBreedCategory(p.breed)})</span>
                     </span>
                     <span className={cn('font-semibold tabular-nums', confidenceText(p.confidence))}>
                       {p.confidence}%

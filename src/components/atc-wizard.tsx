@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { StepIndicator } from '@/components/step-indicator'
 import { UploadStep } from '@/components/upload-step'
 import { ClassifyStep } from '@/components/classify-step'
@@ -21,7 +21,7 @@ function defaultMeasurements(breed?: string): Measurements {
   const standard = breed ? BREED_STANDARDS[breed] : undefined
   return {
     bodyLength: standard?.bodyLength ?? TRAITS[0].ideal,
-    heightWithers: standard?.heightWithers ?? TRAITS[1].ideal,
+    heightAtWithers: standard?.heightAtWithers ?? TRAITS[1].ideal,
     chestWidth: standard?.chestWidth ?? TRAITS[2].ideal,
     rumpAngle: standard?.rumpAngle ?? TRAITS[3].ideal,
   }
@@ -35,15 +35,15 @@ export default function AtcWizard() {
   const [measurements, setMeasurements] = useState<Measurements>(defaultMeasurements())
   const [result, setResult] = useState<AtcResult | null>(null)
 
-  const handleImageSelected = useCallback(async (url: string, seed: number, isSample: boolean) => {
+  const handleImageSelected = useCallback(async (url: string) => {
     setImageUrl(url)
     setClassification(null)
     setClassifying(true)
     setStep(1)
 
-    const res = await classifyImage(url, seed, isSample)
+    const res = await classifyImage(url)
     setClassification(res)
-    setMeasurements(defaultMeasurements(res.top.breed))
+    setMeasurements(defaultMeasurements(res.breed))
     setClassifying(false)
   }, [])
 
@@ -53,7 +53,7 @@ export default function AtcWizard() {
 
   const handleCalculate = useCallback(() => {
     if (!classification) return
-    setResult(computeAtcScore(measurements, classification.top.breed))
+    setResult(computeAtcScore(measurements, classification.breed))
     setStep(3)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [classification, measurements])
@@ -89,11 +89,11 @@ export default function AtcWizard() {
 
       {step === 2 && classification && (
         <MeasureStep
-          breed={classification.top.breed}
+          breed={classification.breed}
           imageUrl={imageUrl}
           measurements={measurements}
           onChange={handleMeasurementChange}
-          onReset={() => setMeasurements(defaultMeasurements(classification.top.breed))}
+          onReset={() => setMeasurements(defaultMeasurements(classification.breed))}
           onBack={() => setStep(1)}
           onCalculate={handleCalculate}
         />
@@ -102,10 +102,11 @@ export default function AtcWizard() {
       {step === 3 && result && classification && (
         <ResultsStep
           result={result}
-          breed={classification.top.breed}
-          category={classification.top.category}
+          breed={classification.breed}
+          category={classification.category}
           imageUrl={imageUrl}
           onRestart={handleRestart}
+          classificationConfidence={classification.confidence}
         />
       )}
     </section>

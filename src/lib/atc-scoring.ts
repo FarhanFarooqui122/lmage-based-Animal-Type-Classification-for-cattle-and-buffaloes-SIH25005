@@ -1,4 +1,4 @@
-import { ATCScoreResult, BreedStandard, Measurements, TraitScore } from '@/types'
+import { ATCScoreResult, Measurements, TraitScore } from '@/types'
 import { getBreed } from './breed-standards'
 
 function computeTraitScore(

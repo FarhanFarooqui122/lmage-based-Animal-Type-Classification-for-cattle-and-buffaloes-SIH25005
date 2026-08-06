@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Camera, ImageIcon, Sparkles, Upload } from 'lucide-react'
 
 interface UploadStepProps {
-  onImageSelected: (url: string, seed: number, isSample: boolean) => void
+  onImageSelected: (url: string) => void
 }
 
 export function UploadStep({ onImageSelected }: UploadStepProps) {
@@ -17,8 +17,7 @@ export function UploadStep({ onImageSelected }: UploadStepProps) {
     (file: File) => {
       if (!file.type.startsWith('image/')) return
       const url = URL.createObjectURL(file)
-      const seed = file.size + file.name.length
-      onImageSelected(url, seed, false)
+      onImageSelected(url)
     },
     [onImageSelected],
   )
@@ -106,7 +105,7 @@ export function UploadStep({ onImageSelected }: UploadStepProps) {
         variant="outline"
         size="lg"
         className="mx-auto w-full sm:w-auto"
-        onClick={() => onImageSelected('/images/sample-gir-cow.png', 0, true)}
+        onClick={() => onImageSelected('/images/sample-gir-cow.png')}
       >
         <Sparkles className="size-4 text-accent" aria-hidden />
         Try with a sample Gir cow image

@@ -68,6 +68,18 @@ UploadStep → handleImageSelected()
 - **Recovery:** Use Cell 8b if runtime disconnects after Phase 1 — reloads checkpoint and skips to fine-tuning
 - **Export:** Cell 11-13 converts Keras .h5 → TF.js LayersModel + metadata.json, downloads as zip
 
+### Model Training (Local GPU)
+- **Script:** `train_local.py` — standalone local port of colab_train.py (no Colab deps)
+- **Hardware:** College RTX 2000 Ada (24 GB VRAM); default `batch-size=64` (Colab used 32)
+- **Deps:** `pip install -r requirements-train.txt` (tensorflow, tensorflowjs, kaggle, scikit-learn, h5py)
+- **Kaggle auth:** uses `~/.kaggle/kaggle.json` via the `kaggle` CLI (KAGGLE_CONFIG_DIR set automatically)
+- **Paths:** all under `training/` — `downloads/` (zips), `raw/` (extracted breeds), `data/train|val`, `output/` (checkpoints + TF.js)
+- **Data pipeline:** modern `tf.keras.utils.image_dataset_from_directory` + tf.data augmentation (Keras 3; NO legacy `ImageDataGenerator`). Normalization `(pixels/127.5)-1.0` matches the app's TF.js loader
+- **Same model:** MobileNetV2 (imagenet), frozen-base phase → fine-tune top 1/3, sparse categorical loss (Keras 3 compatible; Colab uses categorical_crossentropy)
+- **Resume:** `--skip-download` / `--skip-phase1`; frozen checkpoint auto-loads if present
+- **Export:** writes `training/output/tfjs_model/` (model.json + weights.bin + metadata.json) — copy those into `public/models/` to deploy
+- **Usage:** `python train_local.py --epochs 100` (± `--batch-size`, `--split`, `--seed`)
+
 ### Breed Standards
 16 breeds defined in `src/lib/breed-standards.ts` (10 cattle + 6 buffalo). Only 8 are detectable by the model. Each has ideal body measurements and tolerance (10%).
 
@@ -91,6 +103,8 @@ UploadStep → handleImageSelected()
 | `src/lib/excel-export.ts` | XLSX generation (SheetJS, wired via `atc-data.ts:exportToExcel()`) |
 | `src/components/atc-wizard.tsx` | Main state controller for the 4-step wizard |
 | `colab_train.py` | Google Colab notebook script for model training & TF.js export (tracked in repo) |
+| `train_local.py` | Standalone local GPU training script (RTX 2000 Ada 24GB) & TF.js export |
+| `requirements-train.txt` | Python deps for `train_local.py` |
 
 ### Model Loading Pattern
 - `loadModel()` is called lazily on first classification (not at app startup)
@@ -108,6 +122,7 @@ UploadStep → handleImageSelected()
 - `npm run dev` — development server
 - `npm run build` — production build (includes TypeScript check)
 - `npm run lint` — ESLint
+- `python train_local.py --epochs 100` — train model on local GPU (needs `pip install -r requirements-train.txt`)
 - Build must pass before pushing (TypeScript errors will fail build)
 
 ## Git Workflow

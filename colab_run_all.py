@@ -1,53 +1,63 @@
 # -*- coding: utf-8 -*-
 """
-Train MobileNetV2 for Animal Breed Classification (8 Indian Breeds)
-Compatible with existing ATC project — replaces Teachable Machine model.
+ONE-CLICK FULL TRAINING RUN — ATC 8-breed model (Colab T4 GPU)
+Replaces the 13-cell colab_train.py with a SINGLE cell that does everything:
+install deps → upload kaggle.json → download datasets → extract 8 breeds →
+split train/val → Phase 1 (frozen base) → Phase 2 (fine-tune) → evaluate →
+export TF.js + metadata.json → download zip.
 
-Downloads ONLY the needed breed folders from Kaggle datasets via API.
-No full dataset download needed.
+How to use:
+  1. Colab → Runtime → Change runtime type → T4 GPU
+  2. Paste the ENTIRE block below (without the """ quotes) into one cell
+  3. Run — upload kaggle.json when prompted (needs a Kaggle account)
+  4. Wait ~3 hrs (EarlyStopping usually finishes sooner)
+  5. Unzip the downloaded tfjs_model.zip into public/models/ (model.json,
+     group1-shard*.bin, metadata.json)
 
-8 Breeds: Gir, Sahiwal, Kankrej, Ongole, Murrah, Surti, Jaffarabadi, Bhadawari
-Preprocessing: pixels / 127.5 - 1.0  (matches current TF.js loader)
+NOTE: If the runtime disconnects, everything is lost (free-tier /content is
+ephemeral) — just re-run the cell; checkpoints are saved to /content each phase
+so a crash mid-cell is recoverable only if the runtime stays alive.
 """
 
-# ─────────────────────────────────────────────────────────────
-# CELL 1: Install dependencies
-# ─────────────────────────────────────────────────────────────
 """
 !pip install --no-cache-dir tensorflowjs kaggle
 
-import os, zipfile, shutil, random, json
+import os, zipfile, shutil, random, json, datetime
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import confusion_matrix, classification_report
-import seaborn as sns
-print('Done')
-"""
-
-# ─────────────────────────────────────────────────────────────
-# CELL 2: Upload Kaggle API key & download datasets
-# ─────────────────────────────────────────────────────────────
-"""
 from google.colab import files
+from tensorflow import keras
+from tensorflow.keras import layers, models
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from sklearn.metrics import confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+print('TF version:', tf.__version__)
+print('GPU devices:', tf.config.list_physical_devices('GPU'))
+
+# ═══════════════════════════════════════════════════════════
+# STEP 1/7: Kaggle API key + download datasets
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 1/7: Upload kaggle.json and download datasets ===')
 print('Please upload your kaggle.json file:')
-!mkdir -p ~/.kaggle
 uploaded = files.upload()
+kaggle_dir = os.path.expanduser('~/.kaggle')
+os.makedirs(kaggle_dir, exist_ok=True)
 for fn in uploaded.keys():
-    !mv "$fn" ~/.kaggle/kaggle.json
-!chmod 600 ~/.kaggle/kaggle.json
+    shutil.move(fn, os.path.join(kaggle_dir, 'kaggle.json'))
+os.chmod(os.path.join(kaggle_dir, 'kaggle.json'), 0o600)
 
 !kaggle datasets download atharvadarpude/indian-cattle-image-dataset
 !kaggle datasets download atharvadarpude/indian-buffalo-dataset
 !kaggle datasets download birendranathnandi/indian-cattle-and-buffalo-breeds-dataset
 print('Downloads complete')
-"""
 
-# ─────────────────────────────────────────────────────────────
-# CELL 3: Extract ONLY the 8 breed folders we need
-# ─────────────────────────────────────────────────────────────
-"""
+# ═══════════════════════════════════════════════════════════
+# STEP 2/7: Extract ONLY the 8 breed folders we need
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 2/7: Extracting the 8 breed folders ===')
 CATTLE_ZIP = '/content/indian-cattle-image-dataset.zip'
 BUFFALO_ZIP = '/content/indian-buffalo-dataset.zip'
 EXTRA_ZIP = '/content/indian-cattle-and-buffalo-breeds-dataset.zip'
@@ -100,12 +110,11 @@ for breed in sorted(os.listdir(RAW_DIR)):
     count = len([f for f in os.listdir(os.path.join(RAW_DIR, breed))
                  if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
     print(f'  {breed}: {count} images')
-"""
 
-# ─────────────────────────────────────────────────────────────
-# CELL 4: Split into train (80%) / val (20%)
-# ─────────────────────────────────────────────────────────────
-"""
+# ═══════════════════════════════════════════════════════════
+# STEP 3/7: Split into train (80%) / val (20%)
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 3/7: Splitting train/val (80/20) ===')
 TRAIN_DIR = '/content/data/train'
 VAL_DIR = '/content/data/val'
 os.makedirs(TRAIN_DIR, exist_ok=True)
@@ -128,18 +137,10 @@ for breed in sorted(os.listdir(RAW_DIR)):
         shutil.copy2(os.path.join(breed_path, img), os.path.join(VAL_DIR, breed, img))
     print(f'{breed}: {split_idx} train, {len(images)-split_idx} val')
 
-print('Data ready at /content/data/')
-"""
-
-# ─────────────────────────────────────────────────────────────
-# CELL 5: Configure training parameters
-# ─────────────────────────────────────────────────────────────
-"""
-from tensorflow import keras
-from tensorflow.keras import layers, models
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
+# ═══════════════════════════════════════════════════════════
+# STEP 4/7: Data generators + model (MobileNetV2)
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 4/7: Building generators and model ===')
 IMG_SIZE = 224
 BATCH_SIZE = 32
 EPOCHS = 100
@@ -148,18 +149,6 @@ NUM_CLASSES = 8
 CLASSES = ['Gir', 'Sahiwal', 'Kankrej', 'Ongole',
            'Murrah', 'Surti', 'Jaffarabadi', 'Bhadawari']
 
-train_dir = '/content/data/train'
-val_dir = '/content/data/val'
-
-print('TF version:', tf.__version__)
-print('GPU devices:', tf.config.list_physical_devices('GPU'))
-print('Classes:', CLASSES)
-"""
-
-# ─────────────────────────────────────────────────────────────
-# CELL 6: Data generators with augmentation
-# ─────────────────────────────────────────────────────────────
-"""
 train_datagen = ImageDataGenerator(
     preprocessing_function=keras.applications.mobilenet_v2.preprocess_input,
     rotation_range=30,
@@ -177,22 +166,17 @@ val_datagen = ImageDataGenerator(
 )
 
 train_generator = train_datagen.flow_from_directory(
-    train_dir, target_size=(IMG_SIZE, IMG_SIZE), batch_size=BATCH_SIZE,
+    TRAIN_DIR, target_size=(IMG_SIZE, IMG_SIZE), batch_size=BATCH_SIZE,
     class_mode='categorical', classes=CLASSES, shuffle=True,
 )
 
 val_generator = val_datagen.flow_from_directory(
-    val_dir, target_size=(IMG_SIZE, IMG_SIZE), batch_size=BATCH_SIZE,
+    VAL_DIR, target_size=(IMG_SIZE, IMG_SIZE), batch_size=BATCH_SIZE,
     class_mode='categorical', classes=CLASSES, shuffle=False,
 )
 
 print('Class mapping:', train_generator.class_indices)
-"""
 
-# ─────────────────────────────────────────────────────────────
-# CELL 7: Build MobileNetV2 model
-# ─────────────────────────────────────────────────────────────
-"""
 base_model = MobileNetV2(
     input_shape=(IMG_SIZE, IMG_SIZE, 3),
     include_top=False,
@@ -215,13 +199,11 @@ model.compile(
     metrics=['accuracy'],
 )
 
-model.summary()
-"""
-
-# ─────────────────────────────────────────────────────────────
-# CELL 8: Phase 1 — train head (frozen base)
-# ─────────────────────────────────────────────────────────────
-"""
+# ═══════════════════════════════════════════════════════════
+# STEP 5/7: Phase 1 — train head (base frozen)  [~2 hrs]
+#           Phase 2 — fine-tune top 1/3          [~1 hr]
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 5/7: TRAINING (this takes ~3 hrs, EarlyStopping may cut it short) ===')
 callbacks = [
     keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True),
     keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-7),
@@ -229,7 +211,7 @@ callbacks = [
 ]
 
 print('Phase 1: Training head (base frozen)...')
-history = model.fit(
+model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples // BATCH_SIZE,
     validation_data=val_generator,
@@ -237,23 +219,10 @@ history = model.fit(
     epochs=EPOCHS,
     callbacks=callbacks,
 )
-"""
-
-# ─────────────────────────────────────────────────────────────
-# CELL 8b: RECOVERY — use if runtime disconnected after Phase 1
-# ─────────────────────────────────────────────────────────────
-"""
-print('Data folder exists:', os.path.isdir('/content/data/train'))
-print('Checkpoint exists:', os.path.isfile('/content/best_model_frozen.h5'))
 
 model.load_weights('/content/best_model_frozen.h5')
-print('Checkpoint loaded! Run Cell 9 for fine-tuning.')
-"""
+print('Phase 1 done — best frozen checkpoint loaded.')
 
-# ─────────────────────────────────────────────────────────────
-# CELL 9: Phase 2 — fine-tune last layers
-# ─────────────────────────────────────────────────────────────
-"""
 base_model.trainable = True
 fine_tune_at = len(base_model.layers) // 3 * 2
 for layer in base_model.layers[:fine_tune_at]:
@@ -271,8 +240,8 @@ callbacks_ft = [
     keras.callbacks.ModelCheckpoint('/content/best_model_finetuned.h5', monitor='val_accuracy', save_best_only=True),
 ]
 
-print('Phase 2: Fine-tuning...')
-history_ft = model.fit(
+print('Phase 2: Fine-tuning top 1/3 of base...')
+model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples // BATCH_SIZE,
     validation_data=val_generator,
@@ -280,12 +249,14 @@ history_ft = model.fit(
     epochs=EPOCHS,
     callbacks=callbacks_ft,
 )
-"""
 
-# ─────────────────────────────────────────────────────────────
-# CELL 10: Evaluate
-# ─────────────────────────────────────────────────────────────
-"""
+model.load_weights('/content/best_model_finetuned.h5')
+print('Training complete — best fine-tuned checkpoint loaded.')
+
+# ═══════════════════════════════════════════════════════════
+# STEP 6/7: Evaluate
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 6/7: Evaluating ===')
 val_generator.reset()
 predictions = model.predict(val_generator, verbose=1)
 y_pred = np.argmax(predictions, axis=1)
@@ -304,15 +275,13 @@ print(classification_report(y_true, y_pred, target_names=CLASSES))
 val_loss, val_acc = model.evaluate(val_generator, verbose=0)
 print(f'Validation Accuracy: {val_acc*100:.2f}%')
 print(f'Validation Loss: {val_loss:.4f}')
-"""
 
-# ─────────────────────────────────────────────────────────────
-# CELL 11: Convert to TF.js LayersModel
-# ─────────────────────────────────────────────────────────────
-"""
+# ═══════════════════════════════════════════════════════════
+# STEP 7/7: Export TF.js + metadata + download zip
+# ═══════════════════════════════════════════════════════════
+print('\n=== STEP 7/7: Exporting TF.js model ===')
 !mkdir -p /content/tfjs_model
 
-model.load_weights('/content/best_model_finetuned.h5')
 model.save('/content/model_final.h5')
 
 !tensorflowjs_converter \
@@ -321,20 +290,12 @@ model.save('/content/model_final.h5')
     /content/model_final.h5 \
     /content/tfjs_model/
 
-print('TF.js model files:')
-!ls -la /content/tfjs_model/
-"""
-
-# ─────────────────────────────────────────────────────────────
-# CELL 12: Generate metadata.json
-# ─────────────────────────────────────────────────────────────
-"""
 metadata = {
     "tfjsVersion": "1.7.4",
     "tmVersion": "2.4.14",
     "packageVersion": "0.8.4-alpha2",
     "packageName": "@teachablemachine/image",
-    "timeStamp": "2026-07-23T00:00:00.000Z",
+    "timeStamp": datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z'),
     "userMetadata": {},
     "modelName": "atc-breed-model",
     "labels": CLASSES,
@@ -344,17 +305,10 @@ metadata = {
 with open('/content/tfjs_model/metadata.json', 'w') as f:
     json.dump(metadata, f, indent=2)
 
-print('metadata.json:')
-!cat /content/tfjs_model/metadata.json
-"""
+print('TF.js model files:')
+!ls -la /content/tfjs_model/
 
-# ─────────────────────────────────────────────────────────────
-# CELL 13: Download TF.js model ZIP
-# ─────────────────────────────────────────────────────────────
-"""
 shutil.make_archive('/content/tfjs_model', 'zip', '/content/tfjs_model')
-
-from google.colab import files
 files.download('/content/tfjs_model.zip')
-print('Done — extract model.json + group1-shard*.bin + metadata.json into public/models/')
+print('ALL DONE — unzip tfjs_model.zip and copy model.json + group1-shard*.bin + metadata.json into public/models/')
 """

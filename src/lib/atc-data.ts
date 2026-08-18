@@ -6,6 +6,8 @@ import type { Measurements as OurMeasurements, ClassificationResult as TypesClas
 
 export type AnimalCategory = 'Cattle' | 'Buffalo'
 
+export const CONFIDENCE_THRESHOLD = 40
+
 export { getBreedCategory }
 
 export interface BreedPrediction {
@@ -100,6 +102,7 @@ export async function classifyImage(
           breed: top.breed,
           category,
           confidence: top.confidence,
+          isReliable: top.confidence >= CONFIDENCE_THRESHOLD,
           topPredictions: predictions.slice(0, 3).map(p => ({
             breed: p.breed,
             confidence: p.confidence,
@@ -120,6 +123,7 @@ function fallbackPrediction(): ClassificationResult {
     breed: 'Gir',
     category: 'Cattle',
     confidence: 88,
+    isReliable: false,
     topPredictions: [
       { breed: 'Gir', confidence: 88 },
       { breed: 'Sahiwal', confidence: 6 },

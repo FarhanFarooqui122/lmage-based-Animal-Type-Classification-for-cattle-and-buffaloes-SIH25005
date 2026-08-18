@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import type { ClassificationResult } from '@/lib/atc-data'
 import { getBreedCategory } from '@/lib/atc-data'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ArrowRight } from 'lucide-react'
 
 function confidenceColor(c: number) {
   if (c >= 80) return 'bg-success'
@@ -89,6 +89,22 @@ export function ClassifyStep({ loading, imageUrl, result, onBack, onNext }: Clas
           </div>
         ) : (
           <div className="bg-card flex flex-col gap-6 rounded-xl border p-6 shadow-sm">
+            {!result.isReliable && (
+              <div
+                role="alert"
+                className="bg-warning/15 border-warning/40 text-warning-foreground flex items-start gap-3 rounded-lg border p-4"
+              >
+                <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden />
+                <div className="text-sm leading-relaxed">
+                  <p className="font-semibold">Low confidence — breed may be incorrect</p>
+                  <p>
+                    The model is unsure this animal matches any of the 8 supported breeds. The
+                    predicted breed below is a best guess. Verify manually before relying on the
+                    ATC score.
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-5">
               <ConfidenceRing value={result.confidence} />
               <div className="flex flex-col gap-2">

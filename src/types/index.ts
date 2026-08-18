@@ -14,6 +14,7 @@ export interface ClassificationResult {
   category: 'Cattle' | 'Buffalo'
   confidence: number
   topPredictions: Array<{ breed: string; confidence: number }>
+  isReliable: boolean
 }
 
 export interface Measurements {

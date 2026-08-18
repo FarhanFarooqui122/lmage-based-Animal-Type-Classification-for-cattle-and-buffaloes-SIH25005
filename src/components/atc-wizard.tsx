@@ -91,6 +91,7 @@ export default function AtcWizard() {
         <MeasureStep
           breed={classification.breed}
           imageUrl={imageUrl}
+          isReliable={classification.isReliable}
           measurements={measurements}
           onChange={handleMeasurementChange}
           onReset={() => setMeasurements(defaultMeasurements(classification.breed))}

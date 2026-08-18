@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { TRAITS, BREED_STANDARDS, type Measurements, type TraitKey } from '@/lib/atc-data'
-import { ArrowLeft, Calculator, Info, MoveHorizontal, MoveVertical, Ruler, RotateCcw, TriangleRight } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Calculator, Info, MoveHorizontal, MoveVertical, Ruler, RotateCcw, TriangleRight } from 'lucide-react'
 
 const TRAIT_ICONS: Record<TraitKey, React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>> = {
   bodyLength: Ruler,
@@ -14,6 +14,7 @@ const TRAIT_ICONS: Record<TraitKey, React.ComponentType<{ className?: string; 'a
 interface MeasureStepProps {
   breed: string
   imageUrl: string
+  isReliable: boolean
   measurements: Measurements
   onChange: (key: TraitKey, value: number) => void
   onReset: () => void
@@ -21,7 +22,7 @@ interface MeasureStepProps {
   onCalculate: () => void
 }
 
-export function MeasureStep({ breed, imageUrl, measurements, onChange, onReset, onBack, onCalculate }: MeasureStepProps) {
+export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChange, onReset, onBack, onCalculate }: MeasureStepProps) {
   const standard = BREED_STANDARDS[breed]
 
   return (
@@ -33,6 +34,19 @@ export function MeasureStep({ breed, imageUrl, measurements, onChange, onReset, 
           Ideal values shown are the breed standard reference.
         </p>
       </div>
+
+      {!isReliable && (
+        <div
+          role="alert"
+          className="bg-warning/15 border-warning/40 text-warning-foreground flex items-start gap-3 rounded-lg border p-4"
+        >
+          <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden />
+          <p className="text-sm leading-relaxed">
+            The breed classification had low confidence. The <strong>{breed}</strong> standard is
+            being applied, but the ATC score should be treated with caution.
+          </p>
+        </div>
+      )}
 
       <div className="bg-secondary/60 border-primary/20 flex items-start gap-3 rounded-lg border p-4">
         <Info className="text-primary mt-0.5 size-5 shrink-0" aria-hidden />

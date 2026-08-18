@@ -40,9 +40,10 @@ UploadStep → handleImageSelected()
     → ensureModelLoaded() → tfjs-loader.ts:loadModel() [cached, runs once]
     → tfjs-loader.ts:classifyImage(imgElement)
     → getBreedCategory()
+    → isReliable = topConfidence >= CONFIDENCE_THRESHOLD (40)
   → setState({result, step:1})
-→ ClassifyStep shows predictions
-→ MeasureStep → computeAtcScore(measurements, breed)
+→ ClassifyStep shows predictions + warning banner if !isReliable
+→ MeasureStep → computeAtcScore(measurements, breed) [+ caution note if !isReliable]
   → atc-scoring.ts:calculateATCScore()
 → ResultsStep → exportToExcel() // generates XLSX via SheetJS
 ```
@@ -53,7 +54,9 @@ UploadStep → handleImageSelected()
 - **Preprocessing:** resize to 224x224 → toFloat() → div(127.5) → sub(1.0) [normalize to [-1, 1]] — matches `mobilenet_v2.preprocess_input`
 - **Labels:** ["Gir","Sahiwal","Kankrej","Ongole","Murrah","Surti","Jaffarabadi","Bhadawari"]
 - **Category mapping:** Cattle = Gir, Sahiwal, Kankrej, Ongole; Buffalo = Murrah, Surti, Jaffarabadi, Bhadawari
-- **Model files:** `public/models/model.json` (Keras 3 format), `group1-shard1of3.bin`/`shard2of3`/`shard3of3` (weights shards), `metadata.json`
+- **Model files:** `public/models/model.json` (Keras 2 schema — converted from Keras 3 export by `fix_tfjs_model.py`), `group1-shard1of3.bin`/`shard2of3`/`shard3of3` (weights shards), `metadata.json`
+- **Deployed model:** custom MobileNetV2 trained 2026-08-18, **89.4% val accuracy** (replaces old Teachable Machine model)
+- **Low-confidence guard:** `CONFIDENCE_THRESHOLD = 40` in `atc-data.ts` — below it `ClassificationResult.isReliable=false`, UI shows "unknown breed" warning banners (classify + measure steps); fallback/mock predictions are always unreliable
 
 ### Model Training (Colab)
 - **Script:** `colab_train.py` — 13 cells, copy-paste into Colab notebook
@@ -63,7 +66,7 @@ UploadStep → handleImageSelected()
   - `atharvadarpude/indian-cattle-image-dataset` — 50 cattle breeds, CC0
   - `atharvadarpude/indian-buffalo-dataset` — 17 buffalo breeds, CC0
   - `birendranathnandi/indian-cattle-and-buffalo-breeds-dataset` — extra, Apache 2.0
-- **Results:** ~83% val accuracy (frozen base), expected ~88%+ after fine-tuning
+- **Results:** 89.4% val accuracy achieved 2026-08-18 (Phase 1 frozen ~83% → Phase 2 fine-tune 89.4%). Per-breed recall weakest on Surti (63%) & Bhadawari (52%) — small classes
 - **Image counts:** Gir ~1450, Sahiwal ~1722, Kankrej ~712, Ongole ~814, Murrah ~1130, Surti ~379, Jaffarabadi ~693, Bhadawari ~454
 - **Recovery:** Use Cell 8b if runtime disconnects after Phase 1 — reloads checkpoint and skips to fine-tuning
 - **Export:** Cell 11-13 converts Keras .h5 → TF.js LayersModel + metadata.json, downloads as zip

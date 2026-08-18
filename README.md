@@ -67,7 +67,7 @@ src/
 ├── types/
 │   └── index.ts           # Shared TypeScript interfaces
 public/
-├── models/                # TF.js model (model.json, weights.bin, metadata.json)
+├── models/                # TF.js model (model.json, group1-shard*.bin, metadata.json)
 └── images/                # Sample images
 ```
 

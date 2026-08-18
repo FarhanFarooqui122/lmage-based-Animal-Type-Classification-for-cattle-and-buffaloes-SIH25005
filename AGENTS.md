@@ -53,7 +53,7 @@ UploadStep → handleImageSelected()
 - **Preprocessing:** resize to 224x224 → toFloat() → div(127.5) → sub(1.0) [normalize to [-1, 1]] — matches `mobilenet_v2.preprocess_input`
 - **Labels:** ["Gir","Sahiwal","Kankrej","Ongole","Murrah","Surti","Jaffarabadi","Bhadawari"]
 - **Category mapping:** Cattle = Gir, Sahiwal, Kankrej, Ongole; Buffalo = Murrah, Surti, Jaffarabadi, Bhadawari
-- **Model files:** `public/models/model.json`, `weights.bin`, `metadata.json`
+- **Model files:** `public/models/model.json` (Keras 3 format), `group1-shard1of3.bin`/`shard2of3`/`shard3of3` (weights shards), `metadata.json`
 
 ### Model Training (Colab)
 - **Script:** `colab_train.py` — 13 cells, copy-paste into Colab notebook
@@ -102,7 +102,9 @@ UploadStep → handleImageSelected()
 | `src/lib/breed-standards.ts` | Breed standards data for 16 breeds |
 | `src/lib/excel-export.ts` | XLSX generation (SheetJS, wired via `atc-data.ts:exportToExcel()`) |
 | `src/components/atc-wizard.tsx` | Main state controller for the 4-step wizard |
-| `colab_train.py` | Google Colab notebook script for model training & TF.js export (tracked in repo) |
+| `colab_train.py` | Google Colab notebook script for model training & TF.js export (13 cells, tracked in repo) |
+| `colab_run_all.py` | Single-cell all-in-one Colab run: install → download → train → export (paste whole block, no cell-by-cell) |
+| `fix_tfjs_model.py` | Converts Keras 3-format TF.js model.json to the Keras 2 schema tfjs 4.x can load (run after every export; idempotent) |
 | `train_local.py` | Standalone local GPU training script (RTX 2000 Ada 24GB) & TF.js export |
 | `requirements-train.txt` | Python deps for `train_local.py` |
 
@@ -116,7 +118,8 @@ UploadStep → handleImageSelected()
 - `.gitattributes` marks `public/models/*` and `*.bin` as binary to prevent CRLF corruption
 - Colab free tier `/content/` is ephemeral — all data & checkpoints lost on runtime disconnect. Recovery Cell 8b only works if runtime hasn't disconnected
 - Colab GPU quota resets ~24hrs after last use; switch to CPU runtime to export without GPU
-- `colab_train.py` cell blocks are delimited by `"""..."""` — paste without the quotes when adding to Colab
+- `colab_train.py` / `colab_run_all.py` cell blocks are delimited by `"""..."""` — paste without the quotes when adding to Colab
+- tensorflowjs_converter 4.22 + keras 3 exports model.json in Keras 3 schema which tfjs 4.22 `loadLayersModel` CANNOT load (hangs in an infinite loop or throws) — always run `python fix_tfjs_model.py` after every export (fixes InputLayer batch_shape, dtype policy objects, inbound_nodes nesting, input/output layer tuples, DepthwiseConv2D kernel name)
 
 ## Commands
 - `npm run dev` — development server

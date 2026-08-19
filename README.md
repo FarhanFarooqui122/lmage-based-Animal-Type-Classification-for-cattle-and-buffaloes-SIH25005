@@ -146,8 +146,8 @@ For local GPU training instead: `pip install -r requirements-train.txt` then `py
 
 | Step | Preview |
 |---|---|
-| Upload | ![Upload](/images/screenshot-upload.png) |
-| Results | ![Results](/images/screenshot-results.png) |
+| Upload | ![Upload](/public/images/screenshot-upload.png) |
+| Results | ![Results](/public/images/screenshot-results.png) |
 
 A sample Gir cow photo is available at `public/images/sample-gir-cow.png` for quick testing of the upload step.
 

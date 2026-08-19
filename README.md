@@ -6,6 +6,15 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
 [![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-FF6F00)](https://www.tensorflow.org/js)
 
+## Problem
+
+Manual ATC scoring by field workers under the Rashtriya Gokul Mission is:
+
+- **Subjective and inconsistent** — manual scoring achieves only 65–70% accuracy, with results varying from worker to worker
+- **Prone to human error** — fatigue and bias degrade data quality in breeding programs
+- **Time-consuming** — the manual process consumes **40–60%** of field workers' time
+- **Hard to standardize** — no unified digital record, difficult to integrate with the Bharat Pashudhan App (BPA)
+
 ## Features
 
 - **AI breed identification** — Upload a photo of a cow or buffalo and a TensorFlow.js model identifies the breed from **8 Indian breeds** (Gir, Sahiwal, Kankrej, Ongole, Murrah, Surti, Jaffarabadi, Bhadawari) with confidence scores and top-3 predictions.

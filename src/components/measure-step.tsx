@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { TRAITS, BREED_STANDARDS, type Measurements, type TraitKey } from '@/lib/atc-data'
-import { AlertTriangle, ArrowLeft, Calculator, Info, MoveHorizontal, MoveVertical, Ruler, RotateCcw, TriangleRight } from 'lucide-react'
+import { TRAITS, BREED_STANDARDS, getBreedCategory, type Measurements, type TraitKey } from '@/lib/atc-data'
+import { AlertTriangle, ArrowLeft, Calculator, Info, MoveHorizontal, MoveVertical, RotateCcw, Ruler, Tags, TriangleRight } from 'lucide-react'
 
 const TRAIT_ICONS: Record<TraitKey, React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>> = {
   bodyLength: Ruler,
@@ -17,13 +17,17 @@ interface MeasureStepProps {
   isReliable: boolean
   measurements: Measurements
   onChange: (key: TraitKey, value: number) => void
+  onBreedChange: (breed: string) => void
   onReset: () => void
   onBack: () => void
   onCalculate: () => void
 }
 
-export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChange, onReset, onBack, onCalculate }: MeasureStepProps) {
+export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChange, onBreedChange, onReset, onBack, onCalculate }: MeasureStepProps) {
   const standard = BREED_STANDARDS[breed]
+  const allBreeds = Object.keys(BREED_STANDARDS)
+  const cattleBreeds = allBreeds.filter((b) => getBreedCategory(b) === 'Cattle')
+  const buffaloBreeds = allBreeds.filter((b) => getBreedCategory(b) === 'Buffalo')
 
   return (
     <div className="animate-fade-up flex flex-col gap-6">
@@ -55,6 +59,37 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
           lengths and a protractor or inclinometer for the rump angle, following the standard BPA
           field protocol. {'माप लेते समय पशु समतल भूमि पर सीधा खड़ा होना चाहिए।'}
         </p>
+      </div>
+
+      <div className="bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm sm:p-5">
+        <label htmlFor="breed-select" className="flex items-center gap-2 font-semibold">
+          <span className="bg-secondary text-primary flex size-8 items-center justify-center rounded-md">
+            <Tags className="size-4" aria-hidden />
+          </span>
+          <span className="flex flex-col">
+            <span>Breed Standard</span>
+            <span className="text-muted-foreground/60 text-xs font-normal">
+              Override the AI prediction if the breed was misidentified
+            </span>
+          </span>
+        </label>
+        <select
+          id="breed-select"
+          value={breed}
+          onChange={(e) => onBreedChange(e.target.value)}
+          className="bg-background text-foreground w-full rounded-lg border px-3 py-2.5 text-sm font-medium focus:outline-none focus-visible:ring-2"
+        >
+          <optgroup label="Cattle">
+            {cattleBreeds.map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Buffalo">
+            {buffaloBreeds.map((b) => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </optgroup>
+        </select>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_1fr]">

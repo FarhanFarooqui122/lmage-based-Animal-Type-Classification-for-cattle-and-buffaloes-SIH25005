@@ -11,6 +11,7 @@ import {
   TRAITS,
   classifyImage,
   computeAtcScore,
+  getBreedCategory,
   type AtcResult,
   type ClassificationResult,
   type Measurements,
@@ -32,6 +33,7 @@ export default function AtcWizard() {
   const [imageUrl, setImageUrl] = useState('')
   const [classifying, setClassifying] = useState(false)
   const [classification, setClassification] = useState<ClassificationResult | null>(null)
+  const [selectedBreed, setSelectedBreed] = useState('')
   const [measurements, setMeasurements] = useState<Measurements>(defaultMeasurements())
   const [result, setResult] = useState<AtcResult | null>(null)
 
@@ -43,6 +45,7 @@ export default function AtcWizard() {
 
     const res = await classifyImage(url)
     setClassification(res)
+    setSelectedBreed(res.breed)
     setMeasurements(defaultMeasurements(res.breed))
     setClassifying(false)
   }, [])
@@ -51,18 +54,24 @@ export default function AtcWizard() {
     setMeasurements((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  const handleBreedChange = useCallback((breed: string) => {
+    setSelectedBreed(breed)
+    setMeasurements(defaultMeasurements(breed))
+  }, [])
+
   const handleCalculate = useCallback(() => {
-    if (!classification) return
-    setResult(computeAtcScore(measurements, classification.breed))
+    if (!classification || !selectedBreed) return
+    setResult(computeAtcScore(measurements, selectedBreed))
     setStep(3)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [classification, measurements])
+  }, [classification, measurements, selectedBreed])
 
   const handleRestart = useCallback(() => {
     if (imageUrl.startsWith('blob:')) URL.revokeObjectURL(imageUrl)
     setStep(0)
     setImageUrl('')
     setClassification(null)
+    setSelectedBreed('')
     setResult(null)
     setMeasurements(defaultMeasurements())
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -87,24 +96,25 @@ export default function AtcWizard() {
         />
       )}
 
-      {step === 2 && classification && (
+      {step === 2 && classification && selectedBreed && (
         <MeasureStep
-          breed={classification.breed}
+          breed={selectedBreed}
           imageUrl={imageUrl}
           isReliable={classification.isReliable}
           measurements={measurements}
           onChange={handleMeasurementChange}
-          onReset={() => setMeasurements(defaultMeasurements(classification.breed))}
+          onBreedChange={handleBreedChange}
+          onReset={() => setMeasurements(defaultMeasurements(selectedBreed))}
           onBack={() => setStep(1)}
           onCalculate={handleCalculate}
         />
       )}
 
-      {step === 3 && result && classification && (
+      {step === 3 && result && classification && selectedBreed && (
         <ResultsStep
           result={result}
-          breed={classification.breed}
-          category={classification.category}
+          breed={selectedBreed}
+          category={getBreedCategory(selectedBreed)}
           imageUrl={imageUrl}
           onRestart={handleRestart}
           classificationConfidence={classification.confidence}

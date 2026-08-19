@@ -144,14 +144,10 @@ For local GPU training instead: `pip install -r requirements-train.txt` then `py
 
 ## Screenshots
 
-> Screenshots pending — will be added from the live wizard.
-
 | Step | Preview |
 |---|---|
-| Upload | Image upload with drag-drop & preview |
-| Classify | Breed predictions with confidence bars + reliability banner |
-| Measure | Body measurement sliders (EN/HI labels) |
-| Results | ATC score, grade, trait breakdown, export |
+| Upload | ![Upload](/images/screenshot-upload.png) |
+| Results | ![Results](/images/screenshot-results.png) |
 
 A sample Gir cow photo is available at `public/images/sample-gir-cow.png` for quick testing of the upload step.
 

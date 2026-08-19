@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 
+# local-only working docs
+/AGENTS.md
+/CLAUDE.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -48,3 +52,5 @@ training/raw/
 training/data/
 training/output/
 training/_extract/
+/tfjs_model.zip
+/tfjs_model/

@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs'
+import { breedStandards } from '@/lib/breed-standards'
 
 interface ModelMetadata {
   labels: string[]
@@ -112,6 +113,5 @@ function getMockPredictions(): Array<{ breed: string; confidence: number }> {
 }
 
 export function getBreedCategory(breed: string): 'Cattle' | 'Buffalo' {
-  const buffaloBreeds = ['Murrah', 'Surti', 'Jaffarabadi', 'Bhadawari']
-  return buffaloBreeds.includes(breed) ? 'Buffalo' : 'Cattle'
+  return breedStandards[breed]?.category ?? 'Cattle'
 }

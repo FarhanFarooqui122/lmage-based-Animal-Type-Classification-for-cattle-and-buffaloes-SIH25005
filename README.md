@@ -172,7 +172,7 @@ A sample Gir cow photo is available at `public/images/sample-gir-cow.png` for qu
 | Model Training | MobileNetV2 (Keras) → TF.js LayersModel |
 | UI | TailwindCSS + shadcn/ui |
 | Excel Export | SheetJS (xlsx) |
-| Deployment | Vercel (static export) |
+| Deployment | Vercel (Next.js standalone build) |
 
 ## Supported Breeds
 

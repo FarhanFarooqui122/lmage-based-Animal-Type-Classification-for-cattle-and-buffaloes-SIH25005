@@ -129,7 +129,7 @@ npm run build
 npx vercel deploy
 ```
 
-All ML inference happens client-side (TensorFlow.js CPU backend), so the deployment is a **static export** — no server-side ML compute or environment variables are needed.
+All ML inference happens client-side (TensorFlow.js CPU backend), so no server-side ML compute or environment variables are needed. The app builds as a standard Next.js app (`output: "standalone"` in `next.config.ts`).
 
 ### (Optional) Retrain the model
 

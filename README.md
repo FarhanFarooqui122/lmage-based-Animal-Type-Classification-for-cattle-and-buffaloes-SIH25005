@@ -122,6 +122,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build (fails on TypeScript errors) |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
+
 ### Deploy to Vercel
 
 ```bash

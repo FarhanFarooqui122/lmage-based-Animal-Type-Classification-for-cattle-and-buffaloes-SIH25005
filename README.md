@@ -54,6 +54,15 @@ Upload Image → AI Classify Breed → Enter Measurements → ATC Score + Export
 
 **Model files** (`public/models/`): `model.json` (Keras 2 schema), `group1-shard1of3.bin` / `shard2of3` / `shard3of3` (weights), `metadata.json` (labels).
 
+| File | Size |
+| --- | --- |
+| `model.json` | 102 KB |
+| `group1-shard1of3.bin` | 4.0 MB |
+| `group1-shard2of3.bin` | 4.0 MB |
+| `group1-shard3of3.bin` | 1.9 MB |
+| `metadata.json` | 388 B |
+| **Total** | **≈ 10 MB** (downloaded once, then cached by the browser) |
+
 ### Training scripts
 
 | Script | Purpose |

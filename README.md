@@ -169,6 +169,15 @@ For local GPU training instead: `pip install -r requirements-train.txt` then `py
 
 A sample Gir cow photo is available at `public/images/sample-gir-cow.png` for quick testing of the upload step.
 
+## Troubleshooting
+
+| Symptom | Likely cause / fix |
+| --- | --- |
+| Model never loads, hangs or throws on first classification | A freshly exported `model.json` is in **Keras 3 schema**, which tfjs 4.x cannot load — run `python fix_tfjs_model.py` on it (idempotent) and redeploy |
+| First classification feels slow | The ≈10 MB model is fetched lazily on first use and cached afterwards; later runs are fast |
+| Predictions show "unknown breed" warnings | Top confidence is below the 40 % threshold (`CONFIDENCE_THRESHOLD` in `src/lib/atc-data.ts`), so the result is flagged unreliable and scoring shows a caution note |
+| Works offline after the first visit | Inference is client-side only (TF.js CPU backend); only the initial model download needs the network |
+
 ## Roadmap
 
 - [ ] Capture and add screenshots of the live wizard

@@ -63,6 +63,19 @@ Upload Image → AI Classify Breed → Enter Measurements → ATC Score + Export
 | `metadata.json` | 388 B |
 | **Total** | **≈ 10 MB** (downloaded once, then cached by the browser) |
 
+### Training data
+
+Pulled automatically with the Kaggle API (`kaggle datasets download …`) — only the breed folders
+that are needed are kept, not the full archives:
+
+| Kaggle dataset | Contents | License |
+| --- | --- | --- |
+| `atharvadarpude/indian-cattle-image-dataset` | 50 Indian cattle breeds | CC0 |
+| `atharvadarpude/indian-buffalo-dataset` | 17 Indian buffalo breeds | CC0 |
+| `birendranathnandi/indian-cattle-and-buffalo-breeds-dataset` | Extra cattle & buffalo images | Apache 2.0 |
+
+Only the 8 detectable breeds are extracted from these and split into train/val folders.
+
 ### Training scripts
 
 | Script | Purpose |

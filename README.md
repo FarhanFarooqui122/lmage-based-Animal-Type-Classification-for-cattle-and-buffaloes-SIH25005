@@ -63,6 +63,17 @@ Upload Image → AI Classify Breed → Enter Measurements → ATC Score + Export
 | `metadata.json` | 388 B |
 | **Total** | **≈ 10 MB** (downloaded once, then cached by the browser) |
 
+Since these are binary weights, the SHA-256 of a known-good export is worth keeping. Re-check after any
+re-export (PowerShell `Get-FileHash <file> -Algorithm SHA256`, or `sha256sum <file>`):
+
+| File | SHA-256 |
+| --- | --- |
+| `model.json` | `35C384B90B51F73784E9D839A492A1DBE74E10DE49B957B90E4D586471D50A6F` |
+| `group1-shard1of3.bin` | `D1548347CCEC0C85AA4ECC28DAECBA2B4CC917A662415CB8A30927F3C0FE1B24` |
+| `group1-shard2of3.bin` | `A703EC40742489F64B6EDC4BA23F1DA221CD3C35C135D00C452F3413166034E6` |
+| `group1-shard3of3.bin` | `F2F6F9CE6A4F5F81DFC0899B28C0BC5C78290BF495843B5FAD73FC1FC92B6046` |
+| `metadata.json` | `93841F1DB267789E5D76CE47975EBB1C1C1C244FB9039F88786B7E9270164B84` |
+
 ### Training data
 
 Pulled automatically with the Kaggle API (`kaggle datasets download …`) — only the breed folders

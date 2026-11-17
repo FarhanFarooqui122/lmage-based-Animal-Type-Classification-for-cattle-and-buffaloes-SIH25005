@@ -121,6 +121,16 @@ Overall letter grade:
 
 Ideal measurements are defined per breed in `src/lib/breed-standards.ts` (10 cattle + 6 buffalo breeds).
 
+## Excel report contents
+
+`exportToExcel()` writes a single **ATC Report** sheet:
+
+| Block | Fields |
+| --- | --- |
+| Header | Animal ID (or `N/A`), Breed, Category, Classification Confidence |
+| Traits | Body Length (cm), Height at Withers (cm), Chest Width (cm), Rump Angle (deg) — each with its measured value, ideal value, 0–100 score and status |
+| Footer | Overall ATC Score, Grade |
+
 ## Getting started + deployment
 
 ### Prerequisites

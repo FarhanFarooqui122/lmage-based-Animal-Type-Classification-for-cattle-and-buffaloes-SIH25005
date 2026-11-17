@@ -194,6 +194,19 @@ All ML inference happens client-side (TensorFlow.js CPU backend), so no server-s
 
 For local GPU training instead: `pip install -r requirements-train.txt` then `python train_local.py --epochs 100`.
 
+Local training keeps everything under `training/`:
+
+| Path | Contents |
+| --- | --- |
+| `training/downloads/` | Raw Kaggle zips |
+| `training/raw/` | Extracted breed folders |
+| `training/data/train`, `training/data/val` | The split the model actually trains on (`--split`, default 0.8) |
+| `training/output/` | Checkpoints and the exported TF.js model |
+
+Flags: `--epochs` (default 100), `--batch-size` (64), `--split` (0.8), `--seed` (42), plus
+`--skip-download` and `--skip-phase1` to resume an interrupted run. Copy `training/output/tfjs_model/*`
+into `public/models/` when it finishes.
+
 ## Screenshots
 
 | Step | Preview |

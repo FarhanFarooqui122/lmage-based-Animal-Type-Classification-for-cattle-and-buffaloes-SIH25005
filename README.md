@@ -192,6 +192,19 @@ All ML inference happens client-side (TensorFlow.js CPU backend), so no server-s
 5. Run `python fix_tfjs_model.py` on the exported `model.json` (required for tfjs 4.x compatibility).
 6. Copy the output into `public/models/`.
 
+### What `fix_tfjs_model.py` changes
+
+tensorflowjs_converter 4.x + Keras 3 emit a schema tfjs 4.22 cannot parse, so the script rewrites
+`model.json` to the Keras 2 shape (idempotent, safe to re-run):
+
+1. `InputLayer`: `batch_shape` → `batch_input_shape`
+2. layer `dtype`: `DTypePolicy` object → plain `"float32"`
+3. strips Keras 3 extras (`module`, `registered_name`)
+4. `inbound_nodes`: `{args: …, kwargs: …}` → flat Keras 2 node arrays (flattens nesting for `Add`)
+5. `model_config.class_name`: `Functional` → `Model`, wrapping flat `input_layers` / `output_layers`
+   tuples into lists
+6. `weightsManifest`: renames DepthwiseConv2D `kernel` → `depthwise_kernel`
+
 For local GPU training instead: `pip install -r requirements-train.txt` then `python train_local.py --epochs 100`.
 
 Local training keeps everything under `training/`:

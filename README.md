@@ -254,6 +254,20 @@ A sample Gir cow photo is available at `public/images/sample-gir-cow.png` for qu
 
 **Breed standards available (16):** All 8 detectables plus Tharparkar, Red Sindhi, Hariana, Rathi, Khillari, Deoni, Banni, Mehsana, Nagpuri, Pandharpuri
 
+Ideal measurements for the 8 the model can actually detect (`src/lib/breed-standards.ts`, all with a
+10 % tolerance window):
+
+| Breed | Category | Body length | Height at withers | Chest width | Rump angle |
+| --- | --- | --- | --- | --- | --- |
+| Gir | Cattle | 155 cm | 135 cm | 48 cm | 25° |
+| Sahiwal | Cattle | 140 cm | 125 cm | 45 cm | 24° |
+| Kankrej | Cattle | 150 cm | 140 cm | 47 cm | 25° |
+| Ongole | Cattle | 160 cm | 145 cm | 50 cm | 26° |
+| Murrah | Buffalo | 150 cm | 135 cm | 52 cm | 28° |
+| Surti | Buffalo | 140 cm | 128 cm | 48 cm | 27° |
+| Jaffarabadi | Buffalo | 155 cm | 140 cm | 55 cm | 29° |
+| Bhadawari | Buffalo | 130 cm | 120 cm | 44 cm | 26° |
+
 ## Project Structure
 
 ```

@@ -130,7 +130,7 @@ Overall letter grade:
 | ≥ 50 | C (Average) |
 | < 50 | D (Poor) |
 
-Ideal measurements are defined per breed in `src/lib/breed-standards.ts` (10 cattle + 6 buffalo breeds).
+Ideal measurements are defined per breed in `src/lib/breed-standards.ts` (10 cattle + 8 buffalo breeds, 18 in total).
 
 ## Excel report contents
 
@@ -265,7 +265,8 @@ A sample Gir cow photo is available at `public/images/sample-gir-cow.png` for qu
 
 **Model detects (8):** Gir, Sahiwal, Kankrej, Ongole, Murrah, Surti, Jaffarabadi, Bhadawari
 
-**Breed standards available (16):** All 8 detectables plus Tharparkar, Red Sindhi, Hariana, Rathi, Khillari, Deoni, Banni, Mehsana, Nagpuri, Pandharpuri
+**Breed standards available (18):** the 8 detectables plus Tharparkar, Red Sindhi, Hariana, Rathi, Khillari
+and Deoni (cattle) and Banni, Mehsana, Nagpuri and Pandharpuri (buffalo) — 10 cattle + 8 buffalo.
 
 Ideal measurements for the 8 the model can actually detect (`src/lib/breed-standards.ts`, all with a
 10 % tolerance window):
@@ -280,6 +281,22 @@ Ideal measurements for the 8 the model can actually detect (`src/lib/breed-stand
 | Surti | Buffalo | 140 cm | 128 cm | 48 cm | 27° |
 | Jaffarabadi | Buffalo | 155 cm | 140 cm | 55 cm | 29° |
 | Bhadawari | Buffalo | 130 cm | 120 cm | 44 cm | 26° |
+
+The other 10 breeds have standards too, but the model never predicts them — they exist so a breed pulled
+from somewhere else can still be scored:
+
+| Breed | Category | Body length | Height at withers | Chest width | Rump angle |
+| --- | --- | --- | --- | --- | --- |
+| Tharparkar | Cattle | 135 cm | 120 cm | 43 cm | 23° |
+| Red Sindhi | Cattle | 130 cm | 118 cm | 42 cm | 24° |
+| Hariana | Cattle | 145 cm | 130 cm | 44 cm | 24° |
+| Rathi | Cattle | 125 cm | 115 cm | 40 cm | 23° |
+| Khillari | Cattle | 140 cm | 132 cm | 42 cm | 25° |
+| Deoni | Cattle | 135 cm | 125 cm | 43 cm | 24° |
+| Banni | Buffalo | 145 cm | 132 cm | 50 cm | 28° |
+| Mehsana | Buffalo | 142 cm | 130 cm | 49 cm | 27° |
+| Nagpuri | Buffalo | 138 cm | 125 cm | 46 cm | 26° |
+| Pandharpuri | Buffalo | 148 cm | 134 cm | 51 cm | 28° |
 
 ## Project Structure
 

@@ -119,16 +119,25 @@ overallScore = Σ (traitScoreᵢ × weightᵢ)          // rounded to nearest in
 
 Trait status thresholds: **Excellent** ≥ 85, **Good** ≥ 70, **Average** ≥ 50, else **Poor**.
 
-Overall letter grade:
+Overall letter grade (`computeAtcScore`):
 
-| Score | Grade |
-|---|---|
-| ≥ 90 | A+ (Excellent) |
-| ≥ 80 | A (Very Good) |
-| ≥ 70 | B+ (Good) |
-| ≥ 60 | B (Fair) |
-| ≥ 50 | C (Average) |
-| < 50 | D (Poor) |
+| Score | Grade | Label |
+| --- | --- | --- |
+| ≥ 90 | A+ | Excellent |
+| ≥ 80 | A | Very Good |
+| ≥ 70 | B | Good |
+| ≥ 55 | C | Average |
+| < 55 | D | Poor |
+
+### Confidence vs grade
+
+Breed confidence and the ATC grade are separate numbers:
+
+- A prediction is reliable only when its top confidence is **≥ 40** (`CONFIDENCE_THRESHOLD` in
+  `src/lib/atc-data.ts`). Below that, the classify and measure steps both show an "unknown breed" warning.
+- If the image fails to load or TF.js throws, `fallbackPrediction()` returns **Gir at 88 %** with
+  `isReliable: false` — so a high-looking percentage on screen does not by itself mean the prediction is
+  trustworthy.
 
 Ideal measurements are defined per breed in `src/lib/breed-standards.ts` (10 cattle + 8 buffalo breeds, 18 in total).
 

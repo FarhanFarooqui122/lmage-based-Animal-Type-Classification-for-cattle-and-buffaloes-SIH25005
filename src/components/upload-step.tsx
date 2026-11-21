@@ -33,17 +33,19 @@ export function UploadStep({ onImageSelected }: UploadStepProps) {
   )
 
   return (
-    <div className="animate-fade-up flex flex-col gap-6">
-      <div className="flex flex-col gap-2 text-center">
-        <h2 className="text-2xl font-bold text-balance sm:text-3xl">
-          Image-based Animal Type Classification for Cattle &amp; Buffaloes
+    <div className="animate-fade-up flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <span className="kicker text-muted-foreground">Step 01 — Image intake</span>
+        <h2 className="headline text-4xl text-balance sm:text-5xl lg:text-6xl">
+          Snap the animal.
+          <br />
+          <span className="bg-accent box-decoration-clone px-1">Get the breed.</span>
         </h2>
-        <p className="text-muted-foreground mx-auto max-w-2xl leading-relaxed text-pretty">
-          Upload a clear side-profile photograph of the animal. The AI model identifies the breed,
-          then guides you through standardized body measurements to produce an objective ATC score
-          — replacing subjective manual scoring in the field.
+        <p className="text-muted-foreground max-w-xl text-sm leading-relaxed text-pretty sm:text-base">
+          Upload a clear side-profile photograph. The model names the breed, then walks you through
+          four standard body measurements for an objective ATC score.
         </p>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-[0.7rem] font-bold tracking-widest text-muted-foreground uppercase">
           {'पशु की स्पष्ट पार्श्व-प्रोफ़ाइल तस्वीर अपलोड करें'}
         </p>
       </div>
@@ -59,26 +61,33 @@ export function UploadStep({ onImageSelected }: UploadStepProps) {
             inputRef.current?.click()
           }
         }}
-        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragging(true)
+        }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={cn(
-          'group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-14 text-center transition-all duration-200 sm:py-20',
-          dragging
-            ? 'border-primary bg-secondary scale-[1.01]'
-            : 'border-border bg-card hover:border-primary/60 hover:bg-secondary/50',
+          'group grid cursor-pointer gap-6 border-2 border-foreground p-6 shadow-[6px_6px_0_0_var(--foreground)] transition-transform duration-150 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8',
+          dragging ? '-translate-y-1 bg-accent' : 'bg-card hover:-translate-y-1',
         )}
       >
-        <div className="bg-secondary text-primary flex size-16 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110">
-          <Camera className="size-8" aria-hidden />
-        </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-lg font-semibold">Drag &amp; drop an animal photo here</p>
-          <p className="text-muted-foreground text-sm">JPG, PNG or WEBP — clear side view recommended</p>
+        <div className="flex items-center gap-4">
+          <div className="bg-secondary flex size-14 shrink-0 items-center justify-center border-2 border-foreground">
+            <Camera className="size-7" aria-hidden />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="font-display text-xl leading-none font-black uppercase">
+              Drag &amp; drop a photo
+            </p>
+            <p className="text-muted-foreground text-[0.7rem] font-bold tracking-widest uppercase">
+              JPG · PNG · WEBP — side view preferred
+            </p>
+          </div>
         </div>
         <Button size="lg" className="w-full sm:w-auto" tabIndex={-1}>
           <Upload className="size-4" aria-hidden />
-          Upload or Capture
+          Select photo
         </Button>
       </div>
 
@@ -96,9 +105,11 @@ export function UploadStep({ onImageSelected }: UploadStepProps) {
       />
 
       <div className="flex items-center gap-3">
-        <div className="bg-border h-px flex-1" aria-hidden />
-        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">or</span>
-        <div className="bg-border h-px flex-1" aria-hidden />
+        <div className="bg-foreground/20 h-0.5 flex-1" aria-hidden />
+        <span className="bg-foreground text-background kicker border-2 border-foreground px-2 py-1">
+          Or
+        </span>
+        <div className="bg-foreground/20 h-0.5 flex-1" aria-hidden />
       </div>
 
       <Button
@@ -107,13 +118,13 @@ export function UploadStep({ onImageSelected }: UploadStepProps) {
         className="mx-auto w-full sm:w-auto"
         onClick={() => onImageSelected('/images/sample-gir-cow.png')}
       >
-        <Sparkles className="size-4 text-accent" aria-hidden />
-        Try with a sample Gir cow image
+        <Sparkles className="size-4" aria-hidden />
+        Try a sample Gir cow
       </Button>
 
-      <div className="text-muted-foreground flex items-center justify-center gap-2 text-xs">
-        <ImageIcon className="size-3.5" aria-hidden />
-        Photos are processed on-device — nothing is uploaded to a server.
+      <div className="flex items-center justify-center gap-2 border-2 border-foreground bg-card px-3 py-2 text-[0.7rem] font-bold tracking-widest uppercase">
+        <ImageIcon className="size-3.5 shrink-0" aria-hidden />
+        Photos are processed on-device
       </div>
     </div>
   )

@@ -74,6 +74,25 @@ re-export (PowerShell `Get-FileHash <file> -Algorithm SHA256`, or `sha256sum <fi
 | `group1-shard3of3.bin` | `F2F6F9CE6A4F5F81DFC0899B28C0BC5C78290BF495843B5FAD73FC1FC92B6046` |
 | `metadata.json` | `93841F1DB267789E5D76CE47975EBB1C1C1C244FB9039F88786B7E9270164B84` |
 
+### `metadata.json`
+
+The app fetches `public/models/metadata.json` before the weights (`src/lib/tfjs-loader.ts`), so this file
+decides what each output neuron means:
+
+| Field | Value |
+| --- | --- |
+| `labels` | `Gir, Sahiwal, Kankrej, Ongole, Murrah, Surti, Jaffarabadi, Bhadawari` — position *i* names output neuron *i* |
+| `imageSize` | 224 |
+| `modelName` | `atc-breed-model` |
+| `tfjsVersion` | 1.7.4 |
+| `tmVersion` | 2.4.14 — the Teachable Machine export format |
+| `packageVersion` | `0.8.4-alpha2` (`@teachablemachine/image`) |
+| `timeStamp` | `2026-08-18T16:56:26.000Z` — when this export was produced |
+
+If the fetch fails, the loader falls back to the same eight labels hard-coded in `tfjs-loader.ts`. When you
+retrain, keep the `labels` array in the exact order of the model's output layer — predictions are mapped by
+index, not by name.
+
 ### Training data
 
 Pulled automatically with the Kaggle API (`kaggle datasets download …`) — only the breed folders

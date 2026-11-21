@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Noto_Sans_Devanagari } from 'next/font/google'
+import { Archivo, Inter, Noto_Sans_Devanagari } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
   subsets: ['latin', 'latin-ext'],
   variable: '--font-inter',
+})
+
+const archivo = Archivo({
+  subsets: ['latin'],
+  variable: '--font-archivo',
+  display: 'swap',
 })
 
 const notoDevanagari = Noto_Sans_Devanagari({
@@ -30,14 +36,17 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#15803d',
+  themeColor: '#14140f',
 }
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`bg-background ${inter.variable} ${notoDevanagari.variable}`}>
+    <html
+      lang="en"
+      className={`bg-background ${inter.variable} ${archivo.variable} ${notoDevanagari.variable}`}
+    >
       <body className="antialiased">{children}</body>
     </html>
   )

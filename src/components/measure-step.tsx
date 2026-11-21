@@ -30,19 +30,21 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
   const buffaloBreeds = allBreeds.filter((b) => getBreedCategory(b) === 'Buffalo')
 
   return (
-    <div className="animate-fade-up flex flex-col gap-6">
-      <div className="flex flex-col gap-1 text-center">
-        <h2 className="text-2xl font-bold sm:text-3xl">Body Measurements</h2>
-        <p className="text-muted-foreground leading-relaxed text-pretty">
-          Enter the four standardized measurements for the classified <strong>{breed}</strong>.
-          Ideal values shown are the breed standard reference.
+    <div className="animate-fade-up flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <span className="kicker text-muted-foreground">Step 03 — Body data</span>
+        <h2 className="headline text-4xl text-balance sm:text-5xl">Four numbers. One score.</h2>
+        <p className="text-muted-foreground max-w-xl text-sm leading-relaxed text-pretty">
+          Enter the four standardized measurements for the classified{' '}
+          <strong className="text-foreground">{breed}</strong>. The ideal column is the breed
+          standard reference.
         </p>
       </div>
 
       {!isReliable && (
         <div
           role="alert"
-          className="bg-warning/15 border-warning/40 text-warning-foreground flex items-start gap-3 rounded-lg border p-4"
+          className="bg-warning text-warning-foreground flex items-start gap-3 border-2 border-foreground p-4 shadow-[4px_4px_0_0_var(--foreground)]"
         >
           <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden />
           <p className="text-sm leading-relaxed">
@@ -52,23 +54,26 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
         </div>
       )}
 
-      <div className="bg-secondary/60 border-primary/20 flex items-start gap-3 rounded-lg border p-4">
-        <Info className="text-primary mt-0.5 size-5 shrink-0" aria-hidden />
-        <p className="text-secondary-foreground text-sm leading-relaxed">
-          Measure the animal while it stands squarely on level ground. Use a measuring tape for
-          lengths and a protractor or inclinometer for the rump angle, following the standard BPA
-          field protocol. {'माप लेते समय पशु समतल भूमि पर सीधा खड़ा होना चाहिए।'}
-        </p>
+      <div className="bg-accent text-accent-foreground flex items-start gap-3 border-2 border-foreground p-4 shadow-[4px_4px_0_0_var(--foreground)]">
+        <Info className="mt-0.5 size-5 shrink-0" aria-hidden />
+        <div className="text-sm leading-relaxed">
+          <p className="font-display font-black uppercase">Field protocol</p>
+          <p className="mt-1">
+            Measure the animal while it stands squarely on level ground. Use a measuring tape for
+            lengths and a protractor or inclinometer for the rump angle, following the standard BPA
+            protocol. {'माप लेते समय पशु समतल भूमि पर सीधा खड़ा होना चाहिए।'}
+          </p>
+        </div>
       </div>
 
-      <div className="bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm sm:p-5">
-        <label htmlFor="breed-select" className="flex items-center gap-2 font-semibold">
-          <span className="bg-secondary text-primary flex size-8 items-center justify-center rounded-md">
+      <div className="border-2 border-foreground bg-card p-4 shadow-[4px_4px_0_0_var(--foreground)] sm:p-5">
+        <label htmlFor="breed-select" className="flex items-center gap-3">
+          <span className="bg-foreground text-background flex size-9 items-center justify-center border-2 border-foreground">
             <Tags className="size-4" aria-hidden />
           </span>
           <span className="flex flex-col">
-            <span>Breed Standard</span>
-            <span className="text-muted-foreground/60 text-xs font-normal">
+            <span className="font-display text-sm font-black uppercase">Breed standard</span>
+            <span className="text-muted-foreground text-[0.65rem] font-bold tracking-widest uppercase">
               Override the AI prediction if the breed was misidentified
             </span>
           </span>
@@ -77,7 +82,7 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
           id="breed-select"
           value={breed}
           onChange={(e) => onBreedChange(e.target.value)}
-          className="bg-background text-foreground w-full rounded-lg border px-3 py-2.5 text-sm font-medium focus:outline-none focus-visible:ring-2"
+          className="bg-card text-foreground mt-3 h-12 w-full border-2 border-foreground px-3 text-sm font-bold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         >
           <optgroup label="Cattle">
             {cattleBreeds.map((b) => (
@@ -92,10 +97,10 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
         </select>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_1fr]">
-        <div className="bg-card h-fit overflow-hidden rounded-xl border shadow-sm max-lg:hidden">
-          <img src={imageUrl || '/placeholder.svg'} alt={`Classified ${breed}`} className="aspect-[4/3] w-full object-cover" />
-          <p className="text-muted-foreground border-t px-4 py-2 text-xs">{breed} — under evaluation</p>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,280px)_1fr] lg:items-start">
+        <div className="border-2 border-foreground bg-card shadow-[5px_5px_0_0_var(--foreground)] max-lg:hidden">
+          <img src={imageUrl || '/placeholder.svg'} alt={`Classified ${breed}`} className="aspect-[4/3] w-full border-b-2 border-foreground object-cover" />
+          <p className="bg-foreground text-background kicker px-3 py-2">{breed} — under evaluation</p>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -105,29 +110,36 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
             const ideal = standard ? standard[t.key] : t.ideal
             const id = `slider-${t.key}`
             return (
-              <div key={t.key} className="bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm sm:p-5">
-                <div className="flex items-center justify-between gap-2">
-                  <label htmlFor={id} className="flex items-center gap-2 font-semibold">
-                    <span className="bg-secondary text-primary flex size-8 items-center justify-center rounded-md">
+              <div
+                key={t.key}
+                className="border-2 border-foreground bg-card p-4 shadow-[4px_4px_0_0_var(--foreground)] sm:p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <label htmlFor={id} className="flex items-center gap-3">
+                    <span className="bg-secondary flex size-9 shrink-0 items-center justify-center border-2 border-foreground">
                       <Icon className="size-4" aria-hidden />
                     </span>
                     <span className="flex flex-col">
-                      <span>
+                      <span className="font-display text-base leading-none font-black uppercase">
                         {t.label}
-                        <span className="text-muted-foreground ml-1 text-xs font-normal">({t.unit})</span>
+                        <span className="text-muted-foreground ml-1.5 text-[0.65rem] font-bold tracking-widest">
+                          {t.unit}
+                        </span>
                       </span>
-                      <span className="text-muted-foreground/60 text-xs font-normal">{t.labelHi}</span>
+                      <span className="text-muted-foreground mt-1 text-[0.7rem] font-semibold">
+                        {t.labelHi}
+                      </span>
                     </span>
                   </label>
-                  <span className="text-primary text-xl font-bold tabular-nums">
+                  <span className="font-display text-3xl leading-none font-black tabular-nums">
                     {value}
-                    <span className="text-muted-foreground ml-0.5 text-sm font-medium">{t.unit}</span>
+                    <span className="text-muted-foreground ml-1 text-xs font-bold">{t.unit}</span>
                   </span>
                 </div>
                 <input
                   id={id}
                   type="range"
-                  className="atc-slider"
+                  className="atc-slider mt-4"
                   min={t.min}
                   max={t.max}
                   step={1}
@@ -135,10 +147,13 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
                   onChange={(e) => onChange(t.key, Number(e.target.value))}
                   aria-describedby={`${id}-hint`}
                 />
-                <div id={`${id}-hint`} className="text-muted-foreground flex items-center justify-between text-xs">
+                <div
+                  id={`${id}-hint`}
+                  className="text-muted-foreground mt-3 flex items-center justify-between text-[0.65rem] font-bold tracking-widest uppercase"
+                >
                   <span className="tabular-nums">{t.min}{t.unit}</span>
-                  <span>
-                    Ideal: <strong className="text-foreground tabular-nums">{ideal}{t.unit}</strong>
+                  <span className="border-2 border-foreground bg-accent text-accent-foreground px-2 py-0.5">
+                    Ideal {ideal}{t.unit}
                   </span>
                   <span className="tabular-nums">{t.max}{t.unit}</span>
                 </div>
@@ -146,21 +161,21 @@ export function MeasureStep({ breed, imageUrl, isReliable, measurements, onChang
             )
           })}
 
-          <Button variant="outline" onClick={onReset} className="w-full sm:w-fit bg-transparent">
+          <Button variant="outline" onClick={onReset} className="w-full sm:w-fit">
             <RotateCcw className="size-4" aria-hidden />
-            Reset to Breed Standard
+            Reset to breed standard
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <Button variant="outline" size="lg" onClick={onBack} className="w-full sm:w-auto bg-transparent">
+      <div className="flex flex-col-reverse gap-3 border-t-2 border-foreground pt-5 sm:flex-row sm:justify-between">
+        <Button variant="outline" size="lg" onClick={onBack} className="w-full sm:w-auto">
           <ArrowLeft className="size-4" aria-hidden />
           Back
         </Button>
         <Button size="lg" onClick={onCalculate} className="w-full sm:w-auto">
           <Calculator className="size-4" aria-hidden />
-          Calculate ATC Score
+          Calculate ATC score
         </Button>
       </div>
     </div>

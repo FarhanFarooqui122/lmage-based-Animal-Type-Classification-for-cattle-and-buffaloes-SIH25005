@@ -1,5 +1,5 @@
-import type { Metadata, Viewport } from 'next'
-import { Archivo, Inter, Noto_Sans_Devanagari } from 'next/font/google'
+﻿import type { Metadata, Viewport } from 'next'
+import { Archivo_Black, Inter, Noto_Sans_Devanagari } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -7,8 +7,9 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-const archivo = Archivo({
+const archivo = Archivo_Black({
   subsets: ['latin'],
+  weight: '400',
   variable: '--font-archivo',
   display: 'swap',
 })
@@ -20,7 +21,7 @@ const notoDevanagari = Noto_Sans_Devanagari({
 })
 
 export const metadata: Metadata = {
-  title: 'ATC — Animal Type Classification | Rashtriya Gokul Mission',
+  title: 'ATC â€” Animal Type Classification | Rashtriya Gokul Mission',
   description:
     'AI-powered image-based Animal Type Classification for cattle and buffaloes. Upload a photo, identify the breed, enter measurements, and generate a standardized ATC score. Ministry of Fisheries, Animal Husbandry & Dairying, Government of India.',
   generator: 'v0.app',

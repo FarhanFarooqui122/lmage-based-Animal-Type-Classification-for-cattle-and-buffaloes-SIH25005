@@ -151,6 +151,7 @@
   h3,
   .font-display {
     font-family: var(--font-display);
+    font-synthesis-weight: none;
     letter-spacing: -0.02em;
   }
 }
@@ -179,7 +180,7 @@
   }
   .headline {
     font-family: var(--font-display);
-    font-weight: 900;
+    font-weight: 400;
     letter-spacing: -0.035em;
     line-height: 0.92;
     text-transform: uppercase;

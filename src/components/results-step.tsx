@@ -6,10 +6,10 @@ import { exportToExcel, TRAITS, type AnimalCategory, type AtcResult, type TraitS
 import { FileSpreadsheet, RefreshCw } from 'lucide-react'
 
 const STATUS_STYLES: Record<TraitScore['status'], { badge: string; bar: string }> = {
-  Excellent: { badge: 'bg-success/15 text-success', bar: 'bg-success' },
-  Good: { badge: 'bg-chart-3/15 text-chart-3', bar: 'bg-chart-3' },
-  Average: { badge: 'bg-warning/25 text-warning-foreground', bar: 'bg-warning' },
-  Poor: { badge: 'bg-destructive/15 text-destructive', bar: 'bg-destructive' },
+  Excellent: { badge: 'bg-success text-success-foreground', bar: 'bg-success' },
+  Good: { badge: 'bg-chart-3 text-white', bar: 'bg-chart-3' },
+  Average: { badge: 'bg-warning text-warning-foreground', bar: 'bg-warning' },
+  Poor: { badge: 'bg-destructive text-white', bar: 'bg-destructive' },
 }
 
 interface ResultsStepProps {
@@ -28,32 +28,39 @@ for (const t of TRAITS) {
 
 export function ResultsStep({ result, breed, category, imageUrl, onRestart, classificationConfidence }: ResultsStepProps) {
   return (
-    <div className="animate-fade-up flex flex-col gap-6">
-      <div className="flex flex-col gap-1 text-center">
-        <h2 className="text-2xl font-bold sm:text-3xl">ATC Score Report</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Standardized type classification for the evaluated {category.toLowerCase()}
+    <div className="animate-fade-up flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <span className="kicker text-muted-foreground">Step 04 — Report</span>
+        <h2 className="headline text-4xl text-balance sm:text-5xl">The score sheet.</h2>
+        <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
+          Standardized type classification for the evaluated {category.toLowerCase()}.
         </p>
       </div>
 
-      <div className="bg-card flex flex-col items-center gap-6 rounded-xl border p-6 shadow-sm sm:flex-row sm:p-8">
-        <div className="overflow-hidden rounded-lg border max-sm:w-full sm:size-36 sm:shrink-0">
+      <div className="grid border-2 border-foreground bg-card shadow-[6px_6px_0_0_var(--foreground)] sm:grid-cols-[220px_1fr]">
+        <div className="border-foreground max-sm:border-b-2 sm:border-r-2">
           <img
             src={imageUrl || '/placeholder.svg'}
             alt={`Evaluated ${breed}`}
-            className="size-full object-cover max-sm:aspect-[4/3]"
+            className="aspect-[4/3] size-full object-cover"
           />
         </div>
-        <div className="flex flex-1 flex-col items-center gap-2 text-center">
-          <span className="text-muted-foreground text-xs font-semibold uppercase tracking-widest">Overall ATC Score</span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-primary text-6xl font-bold tabular-nums sm:text-7xl">{result.overall}</span>
-            <span className="text-muted-foreground text-2xl font-semibold">/100</span>
+        <div className="flex flex-col gap-4 p-6 sm:p-8">
+          <span className="kicker text-muted-foreground">Overall ATC score</span>
+          <div className="flex items-end gap-2">
+            <span className="font-display text-7xl leading-none font-black tabular-nums sm:text-8xl">
+              {result.overall}
+            </span>
+            <span className="text-muted-foreground mb-2 text-xl font-bold">/100</span>
           </div>
-          <span className="bg-accent text-accent-foreground rounded-full px-4 py-1.5 text-sm font-bold">
-            {result.grade} — {result.gradeLabel}
-          </span>
-          <span className="text-muted-foreground text-sm">{breed} ({category})</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="bg-accent text-accent-foreground -rotate-2 border-2 border-foreground px-3 py-1 text-sm font-black tracking-widest uppercase shadow-[3px_3px_0_0_var(--foreground)]">
+              {result.grade} — {result.gradeLabel}
+            </span>
+            <span className="text-muted-foreground text-[0.65rem] font-bold tracking-widest uppercase">
+              {breed} · {category}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -61,46 +68,58 @@ export function ResultsStep({ result, breed, category, imageUrl, onRestart, clas
         {result.traits.map((t) => {
           const styles = STATUS_STYLES[t.status]
           return (
-            <div key={t.key} className="bg-card flex flex-col gap-3 rounded-xl border p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-2">
+            <div
+              key={t.key}
+              className="border-2 border-foreground bg-card p-5 shadow-[4px_4px_0_0_var(--foreground)]"
+            >
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col">
-                  <h3 className="font-semibold">{t.label}</h3>
-                  <span className="text-muted-foreground/60 text-xs">{labelHiMap[t.label]}</span>
-                  <p className="text-muted-foreground text-sm tabular-nums">
-                    {t.measured}{t.unit} measured · {t.ideal}{t.unit} ideal
+                  <h3 className="font-display text-lg leading-none font-black uppercase">{t.label}</h3>
+                  <span className="text-muted-foreground mt-1 text-[0.7rem] font-semibold">{labelHiMap[t.label]}</span>
+                  <p className="mt-2 text-[0.65rem] font-bold tracking-wide uppercase">
+                    {t.measured}{t.unit}{' '}
+                    <span className="text-muted-foreground">measured ·</span> {t.ideal}{t.unit}{' '}
+                    <span className="text-muted-foreground">ideal</span>
                   </p>
                 </div>
-                <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', styles.badge)}>
+                <span
+                  className={cn(
+                    'shrink-0 border-2 border-foreground px-2 py-0.5 text-[0.6rem] font-bold tracking-widest uppercase',
+                    styles.badge,
+                  )}
+                >
                   {t.status}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="mt-4 flex items-center gap-3">
                 <div
-                  className="bg-muted h-2.5 flex-1 overflow-hidden rounded-full"
+                  className="bg-secondary h-4 flex-1 overflow-hidden border-2 border-foreground"
                   role="progressbar"
-                  aria-valuenow={t.score} aria-valuemin={0} aria-valuemax={100}
+                  aria-valuenow={t.score}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
                   aria-label={`${t.label} score`}
                 >
                   <div
-                    className={cn('animate-grow-bar h-full rounded-full', styles.bar)}
+                    className={cn('animate-grow-bar h-full', styles.bar)}
                     style={{ width: `${t.score}%` }}
                   />
                 </div>
-                <span className="w-12 text-right text-lg font-bold tabular-nums">{t.score}</span>
+                <span className="font-display w-12 text-right text-xl font-black tabular-nums">{t.score}</span>
               </div>
             </div>
           )
         })}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+      <div className="flex flex-col gap-3 border-t-2 border-foreground pt-5 sm:flex-row sm:justify-center">
         <Button size="lg" onClick={() => exportToExcel(result, breed, category, classificationConfidence)} className="w-full sm:w-auto">
           <FileSpreadsheet className="size-4" aria-hidden />
           Export to Excel (BPA format)
         </Button>
-        <Button variant="outline" size="lg" onClick={onRestart} className="w-full sm:w-auto bg-transparent">
+        <Button variant="outline" size="lg" onClick={onRestart} className="w-full sm:w-auto">
           <RefreshCw className="size-4" aria-hidden />
-          New Classification
+          New classification
         </Button>
       </div>
     </div>
